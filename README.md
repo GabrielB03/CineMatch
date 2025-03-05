@@ -1,9 +1,9 @@
 # CineMatch
 
-## Overview
+## Visão Geral
 CineMatch é uma aplicação web projetada para fornecer recomendações de filmes e mostrar onde assisti-los nas plataformas de streaming. Com um backend desenvolvido em Python usando Flask, frontend em HTML, CSS e JavaScript, e um banco de dados PostgreSQL para armazenar usuários e informações dos filmes, CineMatch torna a experiência de descobrir e assistir filmes mais fácil e acessível.
 
-## Features
+## Funcionalidades
 - **Sistema de Recomendação de Filmes:** Receba recomendações de filmes com base nas preferências do usuário.
 - **Busca por Filmes:** Pesquise filmes na base de dados do IMDB para ver informações e onde assisti-los.
 - **Registro e Login de Usuários:** Sistema de registro de contas e login para acessar as recomendações personalizadas.
