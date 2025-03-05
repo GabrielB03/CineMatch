@@ -35,9 +35,9 @@ CineMatch é uma aplicação web projetada para fornecer recomendações de film
 ## Como Rodar o Projeto
 
 1. Clone o repositório:
-   ```bash
+  ```bash
    git clone https://github.com/GabrielB03/CineMatch.git
-   ```
+  ```
 2. Instale as dependências:
   ```bash
   pip install -r requirements.txt
