@@ -33,6 +33,7 @@ CineMatch é uma aplicação web projetada para fornecer recomendações de film
   - **register.html:** Página de registro de usuários
 
 ## Como Rodar o Projeto
+
 1. Clone o repositório:
    ```bash
    git clone https://github.com/GabrielB03/CineMatch.git
