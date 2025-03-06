@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from flask_cors import CORS
 import os
+import pandas as pd  # Importando pandas para leitura do Excel
 
 # Obtém o caminho absoluto do projeto e do frontend
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -12,7 +13,10 @@ frontend_path = os.path.abspath(os.path.join(project_root, "../frontend"))
 # Verifica se o frontend existe
 if not os.path.exists(frontend_path):
     raise FileNotFoundError(
-        f"🚨 ERRO: Pasta do frontend não encontrada em {frontend_path}")
+        f"\U0001F6A8 ERRO: Pasta do frontend não encontrada em {frontend_path}")
+
+# Caminho absoluto para o arquivo Excel de recomendações
+EXCEL_FILE_PATH = r"C:\Users\Samsung\Desktop\Gabriel\backend\assets\IMDB-Movie-Database.xlsx"
 
 # Configuração do Flask
 app = Flask(__name__, static_folder=frontend_path, static_url_path="")
@@ -87,6 +91,24 @@ def login():
 @jwt_required()
 def protected():
     return jsonify({"message": "Acesso autorizado!"}), 200
+
+# ✅ Rota para obter recomendações de filmes do Excel
+@app.route("/recommendations", methods=["GET"])
+def get_recommendations():
+    try:
+        # Verifica se o arquivo existe
+        if not os.path.exists(EXCEL_FILE_PATH):
+            return jsonify({"error": "Arquivo de recomendações não encontrado"}), 404
+
+        # Carrega os dados do Excel
+        df = pd.read_excel(EXCEL_FILE_PATH)
+
+        # Seleciona algumas colunas para exibir no frontend
+        movies = df[["Title", "Genre", "IMDB Rating", "Director"]].dropna().to_dict(orient="records")
+
+        return jsonify({"recommendations": movies}), 200
+    except Exception as e:
+        return jsonify({"error": f"Erro ao processar o arquivo: {str(e)}"}), 500
 
 if __name__ == "__main__":
     print(f"🚀 Servindo arquivos do frontend em: {frontend_path}")
