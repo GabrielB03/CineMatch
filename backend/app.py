@@ -16,7 +16,8 @@ if not os.path.exists(frontend_path):
         f"\U0001F6A8 ERRO: Pasta do frontend não encontrada em {frontend_path}")
 
 # Caminho absoluto para o arquivo Excel de recomendações
-EXCEL_FILE_PATH = r"C:\Users\Samsung\Desktop\Gabriel\backend\assets\IMDB-Movie-Database.xlsx"
+EXCEL_FILE_PATH = os.path.join(
+    project_root, "assets", "IMDB-Movie-Database.xlsx")
 
 # Configuração do Flask
 app = Flask(__name__, static_folder=frontend_path, static_url_path="")
@@ -87,6 +88,8 @@ def login():
     return jsonify({"message": "Credenciais inválidas"}), 401
 
 # ✅ Rota protegida para teste de autenticação
+
+
 @app.route("/protected", methods=["GET"])
 @jwt_required()
 def protected():
@@ -96,18 +99,32 @@ def protected():
 @app.route("/recommendations", methods=["GET"])
 def get_recommendations():
     try:
-        # Verifica se o arquivo existe
         if not os.path.exists(EXCEL_FILE_PATH):
             return jsonify({"error": "Arquivo de recomendações não encontrado"}), 404
 
         # Carrega os dados do Excel
         df = pd.read_excel(EXCEL_FILE_PATH)
 
-        # Seleciona algumas colunas para exibir no frontend
-        movies = df[["Title", "Genre", "IMDB Rating", "Director"]].dropna().to_dict(orient="records")
+        # Normaliza os dados da coluna Genre
+        df["Genre"] = df["Genre"].astype(str).str.lower().str.strip()
+
+        # Obtém o gênero da requisição
+        genre = request.args.get("genre", "").strip().lower()
+
+        # Filtra os filmes pelo gênero, caso informado
+        if genre:
+            df = df[df["Genre"].str.contains(genre, na=False, regex=True)]
+
+        # Seleciona colunas relevantes
+        if not df.empty:
+            movies = df[["Title", "Genre", "IMDB Rating", "Director"]
+                        ].dropna().to_dict(orient="records")
+        else:
+            movies = []
 
         return jsonify({"recommendations": movies}), 200
     except Exception as e:
+        print(f"Erro ao processar recomendações: {e}")
         return jsonify({"error": f"Erro ao processar o arquivo: {str(e)}"}), 500
 
 if __name__ == "__main__":

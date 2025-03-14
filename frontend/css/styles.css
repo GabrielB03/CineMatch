@@ -12,14 +12,37 @@ body {
 }
 
 header {
-    background-color: #007BFF;
+    background-color: #5e1360;
     color: #fff;
     padding: 1rem;
     text-align: center;
 }
 
+.header-container {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    margin-right: 15px;
+}
+
+.logo img {
+    width: 80px; /* Aumentado de 50px para 80px */
+    height: auto;
+    vertical-align: middle;
+}
+
+header h1 {
+    flex: 1;
+    text-align: left;
+    margin: 0;
+}
+
 header nav {
-    margin-top: 10px;
+    margin-left: auto;
 }
 
 header nav a {
@@ -56,18 +79,60 @@ form input {
 
 form button {
     padding: 10px;
-    background-color: #007BFF;
+    background-color: #5e1360; /* Mesma cor roxa do header */
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 form button:hover {
-    background-color: #0056b3;
+    background-color: #4a0f4c; /* Versão mais escura do roxo do header */
+}
+
+/* Aplicando o mesmo estilo para todos os botões */
+button {
+    padding: 10px;
+    background-color: #5e1360; /* Mesma cor roxa do header */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #4a0f4c; /* Versão mais escura do roxo do header */
 }
 
 footer {
     text-align: center;
     margin-top: 20px;
+}
+
+/* Responsividade para telas pequenas */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+    }
+    
+    .logo {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .logo img {
+        width: 100px; /* Ainda maior na versão mobile para melhor visibilidade */
+    }
+    
+    header h1 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    
+    header nav {
+        margin-left: 0;
+        margin-top: 10px;
+    }
 }
