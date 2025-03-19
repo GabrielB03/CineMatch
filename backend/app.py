@@ -13,7 +13,7 @@ frontend_path = os.path.abspath(os.path.join(project_root, "../frontend"))
 # Verifica se o frontend existe
 if not os.path.exists(frontend_path):
     raise FileNotFoundError(
-        f"\U0001F6A8 ERRO: Pasta do frontend não encontrada em {frontend_path}")
+        f"ERRO: Pasta do frontend não encontrada em {frontend_path}")
 
 # Caminho absoluto para o arquivo Excel de recomendações
 EXCEL_FILE_PATH = os.path.join(
@@ -118,7 +118,7 @@ def get_recommendations():
         # Seleciona colunas relevantes
         if not df.empty:
             movies = df[["Title", "Genre", "IMDB Rating", "Director"]
-                        ].dropna().to_dict(orient="records")
+                        ].dropna().to_dict(orient="records") # type: ignore
         else:
             movies = []
 
