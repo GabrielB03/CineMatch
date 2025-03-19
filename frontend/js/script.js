@@ -121,17 +121,10 @@ async function loadRecommendations() {
     const recommendationsList = document.getElementById("recommendationsList");
 
     if (recommendationsList) {
-      recommendationsList.innerHTML = data.movies
+      recommendationsList.innerHTML = data.recommendations
         .map(
-          (movie) => `
-                <div class="movie">
-                    <img src="${movie.poster_url}" alt="${movie.title}">
-                    <h3>${movie.title} (${movie.release_year})</h3>
-                    <p>Gênero: ${movie.genre}</p>
-                    <p>Nota IMDb: ${movie.imdb_rating}</p>
-                    <p>Disponível em: ${movie.streaming_platforms}</p>
-                </div>
-            `
+          (movie) =>
+            `<li>${movie.Title} - ${movie["IMDb Score (1-10)"]} ⭐ (${movie["Director Name"]})</li>`
         )
         .join("");
     }

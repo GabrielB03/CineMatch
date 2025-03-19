@@ -1,3 +1,6 @@
+import random
+import unicodedata
+from googletrans import Translator
 from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -69,6 +72,7 @@ def register():
     hashed_password = bcrypt.generate_password_hash(
         data["password"]).decode("utf-8")
     new_user = User(
+        # type: ignore
         username=data["username"], email=data["email"], password_hash=hashed_password) # type: ignore
 
     db.session.add(new_user)
@@ -88,12 +92,17 @@ def login():
     return jsonify({"message": "Credenciais inválidas"}), 401
 
 # ✅ Rota protegida para teste de autenticação
-
-
 @app.route("/protected", methods=["GET"])
 @jwt_required()
 def protected():
     return jsonify({"message": "Acesso autorizado!"}), 200
+
+
+def remover_acentos(texto):
+    """Remove acentos de uma string."""
+    if isinstance(texto, str):
+        return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("ASCII")
+    return texto
 
 # ✅ Rota para obter recomendações de filmes do Excel
 @app.route("/recommendations", methods=["GET"])
@@ -102,8 +111,24 @@ def get_recommendations():
         if not os.path.exists(EXCEL_FILE_PATH):
             return jsonify({"error": "Arquivo de recomendações não encontrado"}), 404
 
-        # Carrega os dados do Excel
-        df = pd.read_excel(EXCEL_FILE_PATH)
+        # Carrega os dados do Excel corretamente
+        df = pd.read_excel(
+            EXCEL_FILE_PATH, sheet_name="IMDb Movie Database", header=0)
+
+        # Debug: Exibe as primeiras linhas no terminal
+        print("🔹 Primeiras linhas do DataFrame:\n", df.head())
+
+        # Ajusta os nomes das colunas esperadas
+        expected_columns = ["Title", "Genre",
+                            "IMDb Score (1-10)", "Director Name"]
+        df.columns = df.columns.str.strip()  # Remove espaços extras
+
+        # Verifica se todas as colunas esperadas estão no DataFrame
+        if not all(col in df.columns for col in expected_columns):
+            return jsonify({
+                "error": "Colunas esperadas não encontradas no arquivo.",
+                "encontradas": df.columns.tolist()
+            }), 500
 
         # Normaliza os dados da coluna Genre
         df["Genre"] = df["Genre"].astype(str).str.lower().str.strip()
@@ -115,16 +140,19 @@ def get_recommendations():
         if genre:
             df = df[df["Genre"].str.contains(genre, na=False, regex=True)]
 
-        # Seleciona colunas relevantes
+        # Seleciona colunas relevantes e retorna os dados
         if not df.empty:
-            movies = df[["Title", "Genre", "IMDB Rating", "Director"]
-                        ].dropna().to_dict(orient="records") # type: ignore
+            movies = df[expected_columns].dropna().to_dict(orient="records")
+
+            # 🔹 Embaralha as recomendações e retorna no máximo 10 filmes aleatórios
+            random.shuffle(movies)
+            movies = movies[:10]
         else:
             movies = []
 
         return jsonify({"recommendations": movies}), 200
     except Exception as e:
-        print(f"Erro ao processar recomendações: {e}")
+        print(f"❌ Erro ao processar recomendações: {e}")
         return jsonify({"error": f"Erro ao processar o arquivo: {str(e)}"}), 500
 
 if __name__ == "__main__":
