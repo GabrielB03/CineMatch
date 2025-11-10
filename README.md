@@ -34,78 +34,74 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 - **cinematch/**
   - **backend/**
     - **models/**
-      - **__init__.py**
-      - **movie.py**
-      - **rating.py**
-      - **user.py**
-      - **watchlist.py**
+      - **__init__.py**: Inicialização do módulo models
+      - **movie.py**: Modelo do filme
+      - **rating.py**: Modelo de avaliação (rating)
+      - **user.py**: Modelo do usuário
+      - **watchlist.py**: Modelo da lista de desejos (watchlist)
     - **routes/**
-      - **__init__.py**
-      - **auth_routes.py**
-      - **debug_routes.py**
-      - **genre_routes.py**
-      - **movie_routes.py**
-      - **rating_routes.py**
-      - **recommendation_routes.py**
-      - **stats_routes.py**
-      - **watchlist_routes.py**
+      - **__init__.py**: Inicialização do módulo routes
+      - **auth_routes.py**: Rotas de login e registro (autenticação)
+      - **debug_routes.py**: Rotas para debug e testes
+      - **genre_routes.py**: Rotas para manipulação de gêneros
+      - **movie_routes.py**: Rotas para dados de filmes
+      - **rating_routes.py**: Rotas para avaliação de filmes
+      - **recommendation_routes.py**: Rotas para algoritmo de recomendação
+      - **stats_routes.py**: Rotas para estatísticas
+      - **watchlist_routes.py**: Rotas para gerenciamento da lista de desejos
     - **services/**
-      - **__init__.py**
-      - **recommendation_service.py**
-      - **tmdb_service.py**
+      - **__init__.py**: Inicialização do módulo services
+      - **recommendation_service.py**: Lógica do algoritmo de recomendação
+      - **tmdb_service.py**: Integração com TMDB
     - **utils/**
-      - **__init__.py**
-      - **constants.py**
-      - **helpers.py**
-    - **.env**
-    - **app.py**
-    - **config.py**
-    - **extensions.py**
+      - **__init__.py**: Inicialização do módulo utils
+      - **constants.py**: Constantes do projeto
+      - **helpers.py**: Funções auxiliares (helpers)
+    - **.env**: Variáveis de Ambiente e Configuração de BD
+    - **app.py**: Ponto de entrada da aplicação Flask
+    - **config.py**: Configurações gerais
+    - **extensions.py**: Inicialização de extensões (SQLAlchemy, etc.)
 - **frontend/**
   - **node_modules/**
   - **public/**
   - **src/**
     - **assets/**
-      - **cinematch.png**
+      - **cinematch.png**: Logo/ícone do projeto
     - **components/**
-      - **Feedback.jsx**
-      - **Layout.jsx**
-      - **StarRating.jsx**
-      - **ThemeSwitch.jsx**
+      - **Feedback.jsx**: Componente de feedback ou mensagens
+      - **Layout.jsx**: Estrutura principal da página (header/footer)
+      - **StarRating.jsx**: Componente de avaliação por estrelas
+      - **ThemeSwitch.jsx**: Botão dark/light mode
     - **pages/**
-      - **GenreSelectionPage.jsx**
-      - **HomePage.jsx**
-      - **LoginPage.jsx**
-      - **RecommendationPage.jsx**
-      - **RegisterPage.jsx**
+      - **GenreSelectionPage.jsx**: Página de seleção de gêneros
+      - **HomePage.jsx**: Página inicial
+      - **LoginPage.jsx**: Página de login
+      - **RecommendationPage.jsx**: Página principal de recomendações
+      - **RegisterPage.jsx**: Página de registro
     - **utils/**
-      - **authApi.js**
-      - **ThemeContext.jsx**
-    - **App.css**
-    - **App.jsx**
-    - **index.css**
-    - **main.jsx**
-  - **genre_selection.html:** Página com seleção de gênero para escolher a recomendação de filmes.
-  - **index.html:** Página para login ou registro de usuários.
-  - **login.html:** Página de login.
-  - **recommendations.html:** Página de recomendações de filmes conforme a seleção de gêneros.
-  - **register.html:** Página de registro de usuários
-  - **.eslintrc.config.js**
-  - **index.html**
-  - **package.json**
+      - **authApi.js**: Funções para manipulação de tokens/autenticação
+      - **ThemeContext.jsx**: Context API para gerenciamento de tema
+    - **App.css**: Estilos globais (incluindo Dark Mode)
+    - **App.jsx**: Roteamento central (React Router)
+    - **index.css**: Estilos base
+    - **main.jsx**: Ponto de montagem do React
+  - **.eslintrc.config.js**: Configuração do linter ESLint
+  - **index.html**: HTML principal (ponto de montagem do React)
+  - **package.json**: Dependências Node
   - **package-lock.json**
-  - **viteconfig.js**
+  - **viteconfig.js**: Configuração do bundler Vite
  - **venv/**
- - **.gitignore**
- - **requirements.txt**
+ - **.gitignore**: Arquivos e pastas a serem ignorados pelo Git
+ - **requirements.txt**: Dependências Python (do Backend)
 
-## Como Rodar o Projeto
+## Como Rodar o Projeto (Localmente)
 
-1. Clone o repositório:
-  ```bash
-   git clone https://github.com/GabrielB03/CineMatch.git
-  ```
-2. Instale as dependências:
+1. Pré-requisitos:
+   - **Python 3.8+**
+   - **Node.js** e **npm** (ou **yarn**)
+   - **PostgreSQL** (Servidor de Banco de Dados)
+   - **React.js** (Conhecimento básico)
+3. Instale as dependências:
   ```bash
   pip install -r requirements.txt
   ```
@@ -119,6 +115,7 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
