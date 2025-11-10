@@ -103,8 +103,6 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
    - **React.js** (Conhecimento básico)
    - **Git**
 
-#
-
 2. Setup e Configuração do Backend (Flask):
 O backend é responsável pela API e pela comunicação com o PostgreSQL.
 
@@ -173,6 +171,7 @@ O projeto requer um banco de dados chamado ```cinematch_db```. Você pode criá-
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
