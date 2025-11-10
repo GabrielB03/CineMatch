@@ -103,6 +103,8 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
    - **React.js** (Conhecimento básico)
    - **Git**
 
+#
+
 2. Setup e Configuração do Backend (Flask):
 O backend é responsável pela API e pela comunicação com o PostgreSQL.
 
@@ -128,11 +130,50 @@ O projeto requer um banco de dados chamado ```cinematch_db```. Você pode criá-
 
   1. Acesse o console do PostgreSQL:
      ```bash
+     psql -U seu_usuario
      ```
+  2. Crie o banco de dados:
+     ```bash
+     CREATE DATABASE cinematch_db;
+     \q  -- Para sair do console
+
+**C. Variáveis de Ambiente**
+  1. Crie o arquivo ```.env``` na pasta ```backend/``` para armazenar as credenciais e configurações do Flask.
+  2. Preencha as variáveis conforme o modelo a seguir, substituindo os valores ```sua_senha```, ```cinematch_user```, ```sua_api_key``` e ```seu_access_token```:
+     ```bash
+     # Configurações do Banco de Dados
+     DB_HOST=localhost
+     DB_PORT=5432
+     DB_NAME=cinematch_db
+     DB_USER=cinematch_user
+     DB_PASSWORD=sua_senha
+
+     # Configurações do TMDB
+     TMDB_API_KEY=sua_api_key
+     TMDB_ACCESS_TOKEN=seu_access_token
+
+     # Configurações do Flask
+     JWT_SECRET_KEY=supersecretkey_ou_outra_chave
+     FLASK_ENV=development
+     FLASK_DEBUG=True
+
+     # Configurações opcionais (URL completa para conexão)
+     DATABASE_URL=postgresql://cinematch_user:sua_senha@localhost:5432/cinematch_db
+     ```
+
+**D. Execução**
+  1. Acesse a pasta do backend:
+     ```cd backend/```
+  2. Execute o servidor Flask:
+     ```bash
+     python app.py
+     ```
+     O Backend estará rodando em ```http://127.0.0.1:5000```.
 
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
