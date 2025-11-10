@@ -32,35 +32,35 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 
 ## Estrutura do Projeto
 - **cinematch/**
-  - **backend/**        # Servidor Flask (Python)
-    - **models/**        # Definições de Modelos e Schemas do BD
-      - **__init__.py**    # Inicialização do módulo models
-      - **movie.py**   # Modelo do filme
-      - **rating.py**    # Modelo de avaliação (rating)
-      - **user.py**   # Modelo do usuário
-      - **watchlist.py**    # Modelo da lista de desejos (watchlist)
-    - **routes/**        # Definições dos Endpoints da API REST
-      - **__init__.py**    # Inicialização do módulo routes
-      - **auth_routes.py**    # Rotas de login e registro (autenticação)
-      - **debug_routes.py**    # Rotas para debug e testes
-      - **genre_routes.py**    # Rotas para manipulação de gêneros
-      - **movie_routes.py**    # Rotas para dados de filmes
-      - **rating_routes.py**    # Rotas para avaliação de filmes
-      - **recommendation_routes.py**    # Rotas para algoritmos de recomendação
-      - **stats_routes.py**    # Rotas para estatísticas
-      - **watchlist_routes.py**    # Rotas para gerenciamento da lista de desejos
-    - **services/**        # Lógica de Negócio e Acesso a Serviços Externos
-      - **__init__.py**    # Inicialização do módulo services
-      - **recommendation_service.py**    # Lógica do algoritmo de recomendação
-      - **tmdb_service.py**    # Integração com TMDB
-    - **utils/**        # Módulos de utilidade
-      - **__init__.py**    # Inicialização do módulo utils
-      - **constants.py**    # Constantes do projeto
-      - **helpers.py**    # Funções auxiliares (helpers)
-    - **.env**        # Variáveis de Ambiente e Configuração de BD
-    - **app.py**        # Ponto de entrada da aplicação Flask
-    - **config.py**        # Configurações gerais
-    - **extensions.py**        # Inicialização de extensões (SQLAlchemy, etc.)
+  - **backend/**
+    - **models/**
+      - **__init__.py**
+      - **movie.py**
+      - **rating.py**
+      - **user.py**
+      - **watchlist.py**
+    - **routes/**
+      - **__init__.py**
+      - **auth_routes.py**
+      - **debug_routes.py**
+      - **genre_routes.py**
+      - **movie_routes.py**
+      - **rating_routes.py**
+      - **recommendation_routes.py**
+      - **stats_routes.py**
+      - **watchlist_routes.py**
+    - **services/**
+      - **__init__.py**
+      - **recommendation_service.py**
+      - **tmdb_service.py**
+    - **utils/**
+      - **__init__.py**
+      - **constants.py**
+      - **helpers.py**
+    - **.env**
+    - **app.py**
+    - **config.py**
+    - **extensions.py**
 - **frontend/**
   - **css/**
     - **styles.css:** Arquivo onde fica a personalização do site.
@@ -92,6 +92,7 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
