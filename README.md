@@ -31,41 +31,12 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 **TMDB API (The Movie Database)**: Fonte de dados para informações de filmes, streamings e gêneros.
 
 ## Estrutura do Projeto
-cinematch/
-├── backend/                        # Servidor Flask (Python)
-│   ├── models/                     # Definições de Modelos e Schemas do BD
-│   │   ├── __init__.py
-│   │   ├── movie.py
-│   │   ├── rating.py
-│   │   ├── user.py
-│   │   └── watchlist.py
-│   │
-│   ├── routes/                     # Definições dos Endpoints da API REST
-│   │   ├── __init__.py
-│   │   ├── auth_routes.py          # Rotas de Login e Registro
-│   │   ├── debug_routes.py         # Rotas para debug e testes
-│   │   ├── genre_routes.py         # Rotas para manipulação de gêneros
-│   │   ├── movie_routes.py
-│   │   ├── rating_routes.py
-│   │   ├── recommendation_routes.py
-│   │   ├── stats_routes.py         # Rotas para estatísticas
-│   │   └── watchlist_routes.py
-│   │
-│   ├── services/                   # Lógica de Negócio e Acesso a Serviços Externos
-│   │   ├── __init__.py
-│   │   ├── recommendation_service.py # Lógica do algoritmo de recomendação
-│   │   └── tmdb_service.py         # Integração com TMDB
-│   │
-│   ├── utils/                      # Módulos de utilidade
-│   │   ├── __init__.py
-│   │   ├── constants.py
-│   │   └── helpers.py
-│   │
-│   ├── .env                        # Variáveis de Ambiente e Configuração de BD
-│   ├── app.py                      # Ponto de entrada da aplicação Flask
-│   ├── config.py                   # Configurações gerais
-│   └── extensions.py               # Inicialização de extensões (SQLAlchemy, etc.)
-│
+**cinematch/**
+  **backend/**
+    **models/**
+      **__init__.py**
+      **movie.py**
+      **rating.py**
 - **frontend/**
   - **css/**
     - **styles.css:** Arquivo onde fica a personalização do site.
@@ -97,6 +68,7 @@ cinematch/
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
