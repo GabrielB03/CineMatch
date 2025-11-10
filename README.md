@@ -31,12 +31,16 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 **TMDB API (The Movie Database)**: Fonte de dados para informações de filmes, streamings e gêneros.
 
 ## Estrutura do Projeto
-**cinematch/**
-  **backend/**
-    **models/**
-      **__init__.py**
-      **movie.py**
-      **rating.py**
+- **cinematch/**
+  - **backend/** 
+    - **models/**
+      - **__init__.py**
+      - **movie.py**
+      - **rating.py**
+      - **user.py**
+      - **watchlist.py**
+    - **routes/**
+      - 
 - **frontend/**
   - **css/**
     - **styles.css:** Arquivo onde fica a personalização do site.
@@ -68,6 +72,7 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
