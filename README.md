@@ -62,15 +62,43 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
     - **config.py**
     - **extensions.py**
 - **frontend/**
-  - **css/**
-    - **styles.css:** Arquivo onde fica a personalização do site.
-  - **js/**
-    - **script.js:** Arquivo JavaScript com as funcionalidades do site.
+  - **node_modules/**
+  - **public/**
+  - **src/**
+    - **assets/**
+      - **cinematch.png**
+    - **components/**
+      - **Feedback.jsx**
+      - **Layout.jsx**
+      - **StarRating.jsx**
+      - **ThemeSwitch.jsx**
+    - **pages/**
+      - **GenreSelectionPage.jsx**
+      - **HomePage.jsx**
+      - **LoginPage.jsx**
+      - **RecommendationPage.jsx**
+      - **RegisterPage.jsx**
+    - **utils/**
+      - **authApi.js**
+      - **ThemeContext.jsx**
+    - **App.css**
+    - **App.jsx**
+    - **index.css**
+    - **main.jsx**
   - **genre_selection.html:** Página com seleção de gênero para escolher a recomendação de filmes.
   - **index.html:** Página para login ou registro de usuários.
   - **login.html:** Página de login.
   - **recommendations.html:** Página de recomendações de filmes conforme a seleção de gêneros.
   - **register.html:** Página de registro de usuários
+ - **.gitignore**
+ - **.eslintrc.config.js**
+ - **index.html**
+ - **package.json**
+ - **package-lock.json**
+ - **README.md**
+ - **viteconfig.js**
+ - **venv/**
+ - **requirements.txt**
 
 ## Como Rodar o Projeto
 
@@ -92,6 +120,7 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
