@@ -12,13 +12,23 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 - **Avaliação e Lista de Desejos:** Permite que os usuários avaliem filmes e os adicionem à sua Watchlist (Lista de Desejos).
 
 ## Tecnologias Usadas
-**Componente**     |     **Tecnologia**                       |     **Detalhe**
-**Backend**        |     **Python & **Flask**                 |     Lógica de servidor, API Restful e gerenciamento de rotas.
-**Frontend**       |     **React.js** & **Vite**              |     Biblioteca para a interface do usuário e bundler rápido.
-**Banco de Dados** |     **PostgreSQL**                       |     Sistema de Gerenciamento de Banco de Dados Relacional.
-**ORM**            |     **SQLAlchemy**                       |     Mapeamento Objeto-Relacional para o Python.
-**Autenticação**   |     **JWT (Json Web Tokens)**            |     Geração de tokens de acesso para segurança de rotas.
-**API Externa**    |     **TMDB API (The Movie Database)**    |     Fonte de dados para informações de filmes, streamings e gêneros.
+**Backend**:
+**Python** & **Flask**: Lógica de servidor, API Restful e gerenciamento de rotas.
+
+**Frontend**:
+**React.js** & **Vite**: Biblioteca para a interface do usuário e bundler rápido.
+
+**Banco de Dados**:
+**PostgreSQL**: Sistema de Gerenciamento de Banco de Dados Relacional.
+
+**ORM**:
+**SQLAlchemy**: Mapeamento Objeto-Relacional para o Python.
+
+**Autenticação**:
+**JWT (Json Web Tokens)**: Geração de tokens de acesso para segurança de rotas.
+
+**API Externa**:
+**TMDB API (The Movie Database)**: Fonte de dados para informações de filmes, streamings e gêneros.
 
 ## Estrutura do Projeto
 - **backend/**
@@ -56,4 +66,5 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
