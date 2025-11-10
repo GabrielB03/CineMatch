@@ -96,14 +96,14 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
 
 ## Como Rodar o Projeto (Localmente)
 
-1. Pré-requisitos:
+### 1. Pré-requisitos:
    - **Python 3.8+**
    - **Node.js** e **npm** (ou **yarn**)
    - **PostgreSQL** (Servidor de Banco de Dados)
    - **React.js** (Conhecimento básico)
    - **Git**
 
-2. Setup e Configuração do Backend (Flask):
+### 2. Setup e Configuração do Backend (Flask):
 O backend é responsável pela API e pela comunicação com o PostgreSQL.
 
 **A. Download e Setup**
@@ -168,20 +168,32 @@ O projeto requer um banco de dados chamado ```cinematch_db```. Você pode criá-
      ```
      O Backend estará rodando em ```http://127.0.0.1:5000```.
 
+### 3. Configuração do Frontend (React)
+O Frontend está configurado para se comunicar com o Backend (```http://127.0.0.1:5000```) via Proxy de Desenvolvimento ```vite.config.js```.
+  1. Acesse a pasta do Frontend:
+     ```bash
+     cd ../frontend
+     ```
+  2. Instale as dependências Node.js:
+     ```bash
+     npm install
+     # ou yarn install
+     ```
+  3. Execute a aplicação React:
+     ```bash
+     npm run dev
+     # ou yarn dev
+     ```
+     O Frontend estará acessível no link gerado pelo Vite (geralmente ```http://localhost:5173```).
+
+### 4. Acesso final
+
+Com o Backend rodando na porta 5000 e o Frontend rodando na porta 5173, acesse seu navegador:
+
+```bash
+http://localhost:5173
+```
+  
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
