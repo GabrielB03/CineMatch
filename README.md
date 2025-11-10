@@ -101,20 +101,39 @@ CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de
    - **Node.js** e **npm** (ou **yarn**)
    - **PostgreSQL** (Servidor de Banco de Dados)
    - **React.js** (Conhecimento básico)
-3. Instale as dependências:
-  ```bash
-  pip install -r requirements.txt
-  ```
-3. Execute o servidor Flask:
-  ```bash
-  python app.py
-  ```
-4. Abra o link generado, no caso:
-   http://127.0.0.1:5000 ou http://192.168.0.101:5000
+   - **Git**
+
+2. Setup e Configuração do Backend (Flask):
+O backend é responsável pela API e pela comunicação com o PostgreSQL.
+
+**A. Download e Setup**
+  1. Clone o repositório:
+     ```bash
+     git clone https://github.com/GabrielB03/CineMatch.git
+     cd CineMatch
+     ```
+  2. Crie e ative o ambiente virtual:
+     ```bash
+     python -m venv venv
+     venv\Scripts\activate  # Windows
+     source venv/bin/activate  # Linux
+     ```
+  3. Instale as dependências Python:
+     ```bash
+     pip install -r requirements.txt
+     ```
+
+**B. Configuração do Banco de Dados (PostgreSQL)**
+O projeto requer um banco de dados chamado ```cinematch_db```. Você pode criá-lo via linha de comando (psql) com o seguinte comando:
+
+  1. Acesse o console do PostgreSQL:
+     ```bash
+     ```
 
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
 
 
 
