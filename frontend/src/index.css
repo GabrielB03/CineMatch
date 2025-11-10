@@ -7,6 +7,16 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --color-primary: #5E1360;
+  --color-primary-hover: #4A0F4C;
+  --bg-page: #F5F5F5;
+  --text-color: #333333;
+  --bg-footer: #F8F8F8;
+  --bg-card: white;
+  --shadow-card: rgba(0, 0, 0, 0.1);
+  --border-input: #CCCCCC;
+  --bg-input: white;
 }
 
 a {
@@ -19,13 +29,8 @@ a:hover {
 }
 
 body {
-  /* REGRAS CRÍTICAS REMOVIDAS/AJUSTADAS: */
   margin: 0;
   padding: 0;
-  /* place-items: center; REMOVIDO */
-  display: block; /* FORÇA O COMPORTAMENTO DE BLOCO */
-  min-width: 100vw; /* GARANTE A LARGURA TOTAL */
-  min-height: auto; /* PERMITE A ROLAGEM */
 }
 
 h1 {
@@ -44,9 +49,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -57,9 +64,11 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+  
   button {
     background-color: #f9f9f9;
   }
