@@ -363,22 +363,22 @@ body.dark-mode header nav button {
 }
 
 #theme-toggle:checked + .theme-switch-label {
-  background-color: #5E1360;
+  background-color: #7B3F93;
 }
 
 #theme-toggle:checked + .theme-switch-label .slider-ball {
   transform: translateX(46px);
-  background-color: #1A1A1A;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.5);
 }
 
 #theme-toggle:checked + .theme-switch-label .moon-icon {
-  color: #1A1A1A;
+  color: #000000;
   transition: color 0.4s
 }
 
 #theme-toggle:checked + .theme-switch-label .sun-icon {
-  color: #5E1360;
+  color: #FFFFFF;
   transition: color 0.4s;
 }
 
