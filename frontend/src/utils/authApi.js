@@ -1,91 +1,88 @@
-/* eslint-disable no-useless-catch */
-// URL base da API Flask.
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://localhost:5000/api";
 
-// ------------------------------------
-// 1. UTILS DE TOKEN
-// ------------------------------------
+export const removeToken = () => {
+  fetch(`${API_BASE_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  })
+    .then((response) => {
+      console.log("Cookie de sessão enviado para a remoção.");
+    })
+    .catch((err) => {
+      console.error("Erro ao tentar remover cookie do servidor:", err);
+    });
+};
 
-export function saveToken(token) {
-  // Salvar o token
-  localStorage.setItem("jwt_token", token);
-}
+export const getToken = () => {
+  return "DUMMY_TOKEN_CHECK";
+};
 
-export function getToken() {
-  // Obter o token
-  return localStorage.getItem("jwt_token");
-}
+const getCookie = (name) => {
+  if (!document.cookie) return null;
+  const xsrfCookies = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .filter((c) => c.startsWith(name + "="));
 
-export function removeToken() {
-  // Remover o token (usado para Logout)
-  localStorage.removeItem("jwt_token");
-}
+  if (xsrfCookies.length === 0) return null;
+  return xsrfCookies[0].split("=")[1];
+};
 
-// ------------------------------------
-// 2. FETCH COM AUTENTICAÇÃO
-// ------------------------------------
+export const decodeToken = (token) => {
+  if (!token || token === "DUMMY_TOKEN_CHECK") return null;
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16).slice(-2));
+        })
+        .join("")
+    );
 
-/**
- * Função utilitária para fazer requisições à API Flask com o token JWT.
- * @param {string} endpoint O endpoint da API, ex: /recommendations
- * @param {object} options Opções do fetch, como method, body, headers.
- * @returns {Promise<Response>} A resposta bruta do fetch.
- */
-export async function fetchWithAuth(endpoint, options = {}) {
-  const token = getToken();
-
-  // Verifica se há um token
-  if (!token) {
-    // Para rotas protegidas, o React deve lidar com o redirecionamento se não houver token.
-    console.error("Token não encontrado. Necessário login.");
-    // Aqui NÃO rejeitamos a Promise, mas retornamos um erro de forma controlada.
-    throw new Error("Token não encontrado");
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
   }
+};
 
-  // Constrói a URL completa
-  const url = `${API_BASE_URL}${endpoint}`;
-
-  // Adiciona o token e o Content-Type aos headers
-  const finalOptions = {
-    ...options,
+export const fetchWithAuth = async (endpoint, options = {}) => {
+  const defaultOptions = {
+    method: "GET",
     headers: {
-      ...options.headers,
-      Authorization: `Bearer ${token}`, // Adiciona o token JWT
-      "Content-Type": "application/json", // Garante o formato JSON
+      "Content-Type": "application/json",
     },
+    credentials: "include",
   };
 
-  try {
-    const response = await fetch(url, finalOptions);
+  const mergedOptions = { ...defaultOptions, ...options };
 
-    // Lógica de tratamento de erro (Adaptado do seu script.js)
-    if (!response.ok) {
-      if (response.status === 401) {
-        // Token expirado ou inválido (IMPORTANTE para segurança)
-        removeToken();
-        // Lança erro para o componente lidar com o redirecionamento
-        throw new Error("Token expirado. Faça login novamente.");
-      } else if (response.status === 404) {
-        throw new Error("Recurso não encontrado.");
-      } else if (response.status === 422) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || "Dados inválidos enviados. (Detalhes ausentes)";
-        throw new Error(`422_VALIDATION_ERROR: ${errorMessage}`);
-      } else {
-        // Tenta ler a mensagem de erro do corpo, se houver
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: response.statusText }));
-        throw new Error(
-          `Erro ${response.status}: ${errorData.message || response.statusText}`
-        );
-      }
+  if (mergedOptions.method !== "GET") {
+    const csrfToken = getCookie("csrf_access_token");
+    if (!csrfToken) {
+      throw new Error("Token CSRF não encontrado. Sessão inválida.");
     }
 
-    // Se a resposta for OK, retorne a resposta para que o componente a processe
-    return response;
-  } catch (error) {
-      // Relança qualquer erro de rede ou o erro de 401/404/etc
-      throw error;
+    mergedOptions.headers["X-CSRF-TOKEN"] = csrfToken;
   }
-}
+
+  const url = `${API_BASE_URL}${endpoint}`;
+
+  const response = await fetch(url, mergedOptions);
+
+  if (response.status === 401) {
+    throw new Error("401: Token expirado ou não autorizado.");
+  }
+
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => ({ message: response.statusText }));
+
+    throw new Error(`${response.status}: ${errorData.message}`);
+  }
+
+  return response;
+};

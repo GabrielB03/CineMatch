@@ -1,143 +1,159 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; 
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import StarRating from '../components/StarRating';
-// O arquivo authApi.js deve ser modificado para propagar a mensagem 422
-import { fetchWithAuth, removeToken, getToken } from '../utils/authApi'; 
+import { fetchWithAuth, removeToken, getToken } from '../utils/authApi';
+import { CircularProgress, Button, Box, Pagination } from '@mui/material';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
-const API_BASE_URL = 'http://localhost:5000'; // Base da API Flask
+const API_BASE_URL = 'https://localhost:5000/api';
+const MOVIES_PER_PAGE = 30;
+const TOTAL_PAGES_PLACEHOLDER = 10; 
 
 const RecommendationPage = () => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
     
-    // 1. Extrai o parâmetro 'genre' da URL (ex: ?genre=28)
     const queryParams = new URLSearchParams(location.search);
     const genreId = queryParams.get('genre');
+    const pageFromUrl = parseInt(queryParams.get('page')) || 1;
 
-    // Estado para armazenar o nome do gênero ou o título padrão
     const [pageTitle, setPageTitle] = useState("Recomendações");
-
-    /**
-     * Função auxiliar para executar a chamada de API e processar a resposta.
-     * @param {string} endpoint - O endpoint RELATIVO (ex: /recommendations/genre?genre_id=X).
-     * @param {function} fetcher - fetch ou fetchWithAuth.
-     * @returns {Promise<boolean>} Retorna true em caso de sucesso, false em caso de falha controlada (ex: array vazio).
-     */
-    const executeFetch = async (endpoint, fetcher) => {
+    const [currentFetcher, setCurrentFetcher] = useState(null);
+    const [currentEndpoint, setCurrentEndpoint] = useState(null);
+    
+    const executeFetch = useCallback(async (endpoint, fetcher, currentPage) => {
         let response;
         const isAuthCall = fetcher === fetchWithAuth;
-        let url = isAuthCall ? endpoint : `${API_BASE_URL}${endpoint}`; // CORREÇÃO: Monta a URL completa para fetch padrão
-
-        // Realiza a chamada. Se for fetchWithAuth, ele cuida do token e da URL base.
-        // Se for fetch padrão (público), usa a URL completa montada acima.
+        const pageParam = `page=${currentPage}&limit=${MOVIES_PER_PAGE}`;
+        const finalEndpoint = `${endpoint}${endpoint.includes('?') ? '&' : '?'}${pageParam}`;
+        
         if (isAuthCall) {
-            response = await fetcher(endpoint); // fetchWithAuth adiciona API_BASE_URL
+            response = await fetcher(finalEndpoint);
         } else {
-            response = await fetcher(url, { // fetch padrão usa a URL completa
-                headers: { "Content-Type": "application/json" }
+            response = await fetch(API_BASE_URL + finalEndpoint, {
+                headers: { "Content-Type": "application/json" },
+                credentials: 'include',
             }); 
+        }
+        
+        if (!response.ok) {
+             throw new Error(`Erro ${response.status}: Falha na requisição da API.`);
+        }
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const textError = await response.text();
+            console.error("Resposta não é JSON:", textError);
+            throw new Error(`Resposta inválida do servidor. Tipo de conteúdo: ${contentType}`);
         }
         
         const data = await response.json();
 
-        // O Flask pode retornar 'recommendations' ou 'movies'
         const results = data.recommendations || data.movies;
 
         if (response.ok && Array.isArray(results)) {
-            setMovies(results);
-            return true; // Sucesso
+            const newMovies = results.map(m => m.movie ? m.movie : m);
+            
+            return newMovies;
         } else {
-            setMovies([]);
-            return false; // Falha (dados vazios, mas sem erro de rede/servidor)
+            return [];
         }
-    };
+    }, []);
     
-    // ------------------------------------
-    // FUNÇÃO DE CARREGAMENTO DE DADOS (useEffect)
-    // ------------------------------------
+    const loadMovies = useCallback(async (currentPage) => {
+        const fetcher = currentFetcher || fetch;
+        const endpoint = currentEndpoint;
+        
+        if (!endpoint) return;
+
+        setLoading(true);
+        setError(null);
+        setPage(currentPage);
+
+        try {
+            const newMovies = await executeFetch(endpoint, fetcher, currentPage);
+            
+            setMovies(newMovies);
+            
+        } catch (err) {
+            console.error("Erro ao carregar recomendações:", err);
+            
+            if (err.message.includes("Token expirado") || err.message.includes("Token não encontrado")) {
+                removeToken();
+                navigate('/login');
+                setError("Sessão expirada. Faça login novamente.");
+            } else {
+                setError("Falha ao carregar filmes. " + err.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [currentFetcher, currentEndpoint, executeFetch, navigate]);
+
     useEffect(() => {
-        const loadRecommendations = async () => {
+        const loadInitialConfig = async () => {
             setLoading(true);
             setError(null);
             
             const token = getToken();
+            let endpoint = "";
+            let fetcher = fetch;
+            let title = "Recomendações";
+            let isPersonalizedAttempt = false;
             
-            let initialEndpoint = ""; // Endpoint deve ser RELATIVO (ex: /recommendations...)
-            let initialFetcher = fetch;
-            let initialTitle = "Recomendações";
-            let isPersonalizedAttempt = false; // Flag para saber se tentamos a rota JWT
+            let genreParam = genreId ? `?genre_id=${genreId}` : '';
             
-            // Lógica para determinar o ENDPOINT INICIAL
             if (genreId) {
-                // Caso 1: Busca por Gênero (Pública)
-                initialEndpoint = `/recommendations/genre?genre_id=${genreId}`; // CORREÇÃO: Endpoint RELATIVO
-                initialTitle = "Recomendações por Gênero Selecionado";
+                endpoint = `/recommendations/genre${genreParam}`; 
+                title = "Recomendações por Gênero Selecionado";
             } else if (token) {
-                // Caso 2: Busca Personalizada (Usuário Logado)
-                initialEndpoint = "/recommendations"; // Endpoint RELATIVO para fetchWithAuth
-                initialFetcher = fetchWithAuth;
-                initialTitle = "Suas Recomendações Personalizadas";
+                endpoint = "/recommendations"; 
+                fetcher = fetchWithAuth;
+                title = "Suas Recomendações Personalizadas";
                 isPersonalizedAttempt = true;
             } else {
-                // Usuário não logado e sem gênero -> Redireciona
                 navigate('/login');
                 return;
             }
             
-            // Define o título antes de iniciar a busca
-            setPageTitle(initialTitle);
-
-
+            setPageTitle(title);
+            setCurrentFetcher(() => fetcher);
+            setCurrentEndpoint(endpoint);
+            setPage(pageFromUrl);
+            
             try {
-                // Tenta a primeira busca (Personalizada ou por Gênero com ID)
-                const success = await executeFetch(initialEndpoint, initialFetcher);
+                const initialMovies = await executeFetch(endpoint, fetcher, pageFromUrl);
 
-                if (success) {
-                    setPageTitle(initialTitle);
-                    return; // Sai se a busca inicial for bem-sucedida
+                if (initialMovies.length > 0) {
+                    setMovies(initialMovies);
+                    return;
                 }
                 
-                // Se falhou (sem erro), mas era a tentativa personalizada, faz o fallback
                 if (isPersonalizedAttempt) {
                     throw new Error("422_FALLBACK_NEEDED: Nenhuma recomendação personalizada encontrada.");
                 }
 
             } catch (err) {
-                console.error("Erro ao carregar recomendações:", err);
-                
-                // 1. Tratamento de Erro de Autenticação (401 - Token expirado)
-                if (err.message.includes("Token expirado") || err.message.includes("Token não encontrado")) {
-                    removeToken();
-                    navigate('/login');
-                    setError("Sessão expirada. Faça login novamente.");
-                    return;
-                }
-                
-                // 2. Tratamento de Erro de Dados Insuficientes (422) ou Falha na Personalização
                 if (isPersonalizedAttempt && (err.message.includes("422") || err.message.includes("422_FALLBACK_NEEDED"))) {
                     
-                    // Define uma mensagem de erro amigável
                     const friendlyMessage = "Você precisa avaliar mais filmes para receber sugestões personalizadas. Exibindo filmes populares para começar.";
                     setError(friendlyMessage);
                     
-                    // --- FALLBACK: Tenta carregar a lista genérica (Popular/Recentes) ---
-                    const fallbackEndpoint = `/recommendations/genre`; // Rota genérica RELATIVA (sem API_BASE_URL)
-                    const fallbackTitle = "Filmes Populares para Avaliação";
+                    setCurrentEndpoint(`/recommendations/popular`);
+                    setCurrentFetcher(() => fetch);
+                    setPageTitle("Filmes Populares para Avaliação");
                     
                     try {
-                        const fallbackSuccess = await executeFetch(fallbackEndpoint, fetch);
-                        if (fallbackSuccess) {
-                            setPageTitle(fallbackTitle);
-                            // Se o fallback for bem-sucedido, o estado de ERRO permanece
-                            // mas o array de MOVIES é preenchido.
+                        const fallbackMovies = await executeFetch(`/recommendations/popular`, fetch, pageFromUrl);
+                        if (fallbackMovies.length > 0) {
+                            setMovies(fallbackMovies);
                         } else {
-                             // Falhou a personalizada e a genérica
-                             setError("Não foi possível carregar nenhuma recomendação. Tente novamente mais tarde.");
+                            setError("Não foi possível carregar nenhuma recomendação. Tente novamente mais tarde.");
                         }
                     } catch (fallbackError) {
                         console.error("Erro no fallback:", fallbackError);
@@ -145,7 +161,6 @@ const RecommendationPage = () => {
                     }
                     
                 } else {
-                    // Outros erros (rede, 404, etc.)
                     setError("Erro ao carregar recomendações: " + err.message);
                 }
             } finally {
@@ -153,14 +168,26 @@ const RecommendationPage = () => {
             }
         };
 
-        loadRecommendations();
+        loadInitialConfig();
     }, [navigate, genreId, location.search]);
-
-    // ------------------------------------
-    // RENDERIZAÇÃO DE ESTADOS
-    // ------------------------------------
     
-    if (loading) {
+    useEffect(() => {
+        if (currentEndpoint) {
+             loadMovies(pageFromUrl);
+        }
+    }, [pageFromUrl, currentEndpoint, loadMovies]);
+
+    const handlePageChange = (event, value) => {
+        let newSearch = `?page=${value}`;
+        
+        if (genreId) {
+            newSearch += `&genre=${genreId}`;
+        }
+        
+        navigate(`${location.pathname}${newSearch}`);
+    };
+
+    if (loading && movies.length === 0) {
         return (
             <Layout headerTitle={pageTitle}>
                 <div className="empty-message">
@@ -170,7 +197,6 @@ const RecommendationPage = () => {
         );
     }
     
-    // Se há ERRO e não há filmes (caso de erro fatal OU 422 onde o fallback falhou)
     if (error && movies.length === 0) {
         return (
             <Layout headerTitle={pageTitle}>
@@ -182,7 +208,6 @@ const RecommendationPage = () => {
         );
     }
     
-    // Se há filmes (incluindo o caso de sucesso no fallback)
     if (movies.length === 0) {
         return (
             <Layout headerTitle={pageTitle}>
@@ -194,23 +219,17 @@ const RecommendationPage = () => {
         );
     }
 
-    // ------------------------------------
-    // RENDERIZAÇÃO PRINCIPAL (Cards de Filme)
-    // ------------------------------------
     return (
         <Layout headerTitle={pageTitle}>
-            {/* Exibe a mensagem de erro amigável APENAS se o fallback foi um sucesso, 
-                indicando que a personalização falhou, mas a lista genérica carregou. */}
-            {error && movies.length > 0 && (
-                 <div className="alert-message">
+            {error && (
+                <div className="alert-message" style={{ margin: '15px 0' }}>
                     <p>⚠️ {error}</p>
-                 </div>
+                </div>
             )}
             
             <h2>{pageTitle}</h2>
             <div className="card-grid" id="recommendationsList">
                 {movies.map((movie) => {
-                    // Checa o token para decidir se exibe o componente de avaliação
                     const showRating = !!getToken();
                     
                     return (
@@ -224,14 +243,12 @@ const RecommendationPage = () => {
                             <p className="plot">{movie.overview || "Nenhuma descrição disponível."}</p>
                             
                             <div className="rating-area">
-                                {/* StarRating só é exibido se o usuário estiver logado */}
                                 {showRating && (
                                     <StarRating 
                                         tmdbId={movie.tmdb_id} 
                                         initialRating={movie.user_rating || 0} 
                                     />
                                 )}
-                                {/* Onde assistir */}
                                 {movie.watch_providers && (
                                     <p className="watch-providers">Onde assistir: {movie.watch_providers}</p>
                                 )}
@@ -240,6 +257,17 @@ const RecommendationPage = () => {
                     );
                 })}
             </div>
+            
+            <Box sx={{ textAlign: 'center', my: 4 }}>
+                <Pagination
+                    count={TOTAL_PAGES_PLACEHOLDER}
+                    page={pageFromUrl}
+                    onChange={handlePageChange}
+                    color="primary"
+                    disabled={loading}
+                    size="large"
+                />
+            </Box>
         </Layout>
     );
 };

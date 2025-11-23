@@ -3,69 +3,109 @@ import { Link, useNavigate } from 'react-router-dom';
 import CineMatchLogo from '../assets/cinematch.png';
 import { getToken, removeToken } from '../utils/authApi';
 import ThemeSwitch from './ThemeSwitch';
+import { AppBar, Toolbar, Button, Typography, Box } from '@mui/material';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
-// Componente que renderiza o cabeçalho e rodapé em todas as páginas
 const Layout = ({ children, headerTitle }) => {
-    
-    // 1. Verifica o estado de autenticação a partir do token
     const isAuthenticated = !!getToken();
     const navigate = useNavigate();
 
-    // 2. Função de Logout
     const handleLogout = () => {
-        removeToken(); // Remove o token
-        navigate('/login'); // Redireciona para o login
+        removeToken();
+        navigate('/login');
     };
 
     return (
         <div className="app-wrapper">
-            <header>
-                <div className="header-container">
-                    <div className="logo">
-                        <Link to="/">
-                            <img src={CineMatchLogo} alt="CineMatch Logo" />
+            <AppBar position="static" color="primary">
+                <Toolbar sx={{ color: 'primary.contrastText' }}> 
+                    <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+                        <Link 
+                            to="/"
+                            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
+                        >
+                            <img src={CineMatchLogo} alt="CineMatch Logo" style={{ height: 40, marginRight: 8 }} />
+                            <Typography variant="h6" component="div">
+                                CineMatch
+                            </Typography>
                         </Link>
-                    </div>
+                    </Box>
 
-                    {headerTitle ? <h1>{headerTitle}</h1> : null}
-                    
-                    <div className="header-actions">
+                    {headerTitle && (
+                        <Typography 
+                            variant="h5" 
+                            component="h1" 
+                            sx={{ 
+                                ml: 4, 
+                                flexGrow: 1, 
+                                textAlign: 'left' 
+                            }}
+                        >
+                            {headerTitle}
+                        </Typography>
+                    )}
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                         <ThemeSwitch />
-                        
-                        <nav>
+                        <nav style={{ marginLeft: 20 }}>
                             {isAuthenticated ? (
-                                // Links para usuário LOGADO
                                 <>
-                                    <Link to="/recommendations" style={{marginRight: '15px'}}>Recomendações</Link>
-                                    <Link to="/genres" style={{marginRight: '15px'}}>Gêneros</Link>
+                                    <Button color="inherit" component={Link} to="/recommendations">
+                                        Recomendações
+                                    </Button>
+                                    <Button color="inherit" component={Link} to="/my-ratings">
+                                        Minhas Notas
+                                    </Button>
+                                    <Button color="inherit" component={Link} to="/genres">
+                                        Gêneros
+                                    </Button>
+                                    <Button color="inherit" component={Link} to="/account">
+                                        CONTA
+                                    </Button>
                                     
-                                    <button 
+                                    <Button 
                                         onClick={handleLogout}
-                                        style={{
-                                            background: 'none',
-                                            border: '1px solid #fff',
-                                            color: '#fff',
-                                            cursor: 'pointer',
-                                            padding: '5px 10px',
-                                            borderRadius: '4px'
+                                        variant="outlined"
+                                        color="secondary"
+                                        size="small"
+                                        startIcon={<ExitToAppIcon />}
+                                        sx={{ 
+                                            ml: 2, 
+                                            borderColor: 'primary.contrastText',
+                                            '&:hover': {
+                                                borderColor: 'secondary.main',
+                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                            }
                                         }}
                                     >
                                         Sair
-                                    </button>
+                                    </Button>
                                 </>
                             ) : (
-                                // Links para usuário NÃO LOGADO
                                 <>
-                                    <Link to="/login" style={{marginRight: '10px'}}>Login</Link>
-                                    <Link to="/register">Registrar</Link>
+                                    <Button color="inherit" component={Link} to="/login">
+                                        Login
+                                    </Button>
+                                    <Button 
+                                        color="inherit" 
+                                        variant="outlined" 
+                                        component={Link} 
+                                        to="/register" 
+                                        sx={{ 
+                                            ml: 1,
+                                            borderColor: 'primary.contrastText' 
+                                        }}
+                                    >
+                                        Registrar
+                                    </Button>
                                 </>
                             )}
                         </nav>
-                    </div>
-                </div>
-            </header>
+                    </Box>
+                </Toolbar>
+            </AppBar>
 
-            <main>
+            <main style={{ padding: '20px' }}>
                 {children}
             </main>
 

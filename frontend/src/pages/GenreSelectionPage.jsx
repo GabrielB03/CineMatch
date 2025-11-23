@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { FormControl, InputLabel, Select, MenuItem, Button, Box, CircularProgress, Alert } from '@mui/material';
+import MovieIcon from '@mui/icons-material/Movie';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'https://localhost:5000';
 
 const GenreSelectionPage = () => {
-    // 1. Estados para gerenciar dados e UI
     const [genres, setGenres] = useState([]);
     const [selectedGenre, setSelectedGenre] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // 2. Efeito para buscar a lista de gêneros na inicialização
     useEffect(() => {
         const fetchGenres = async () => {
             try {
-                // Rota para buscar gêneros
                 const res = await fetch(`${API_BASE_URL}/genres`);
 
                 if (!res.ok) {
@@ -41,55 +40,81 @@ const GenreSelectionPage = () => {
         fetchGenres();
     }, []);
 
-    // 3. Função de submissão do formulário
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (selectedGenre) {
-            // Redireciona para a página de recomendações, passando o gênero como parâmetro de busca (query param)
-            navigate(`/recommendations?genre=${selectedGenre}`);
+            navigate(`/recommendations?genre=${selectedGenre}&page=1`);
         } else {
-            alert("Por favor, selecione um gênero.");
+            setError("Por favor, selecione um gênero.");
         }
     };
 
-    // 4. Renderização do conteúdo
-    const renderContent = () => {
-        if (loading) {
-            return <p className="loading">Carregando lista de gêneros...</p>;
-        }
-
-        if (error) {
-            return <p className="error-message">Erro ao carregar gêneros: {error}</p>;
-        }
-
+    if (loading) {
         return (
-            <form onSubmit={handleSubmit}>
-                <select
-                    id="genreSelect"
-                    required
-                    value={selectedGenre}
-                    onChange={(e) => setSelectedGenre(e.target.value)}
-                >
-
-                    <option value="">-- Escolha um gênero --</option>
-                
-                    {/* Renderiza as opções do Flask */}
-                    {genres.map(genre => (
-                        <option key={genre.id} value={genre.id}>
-                            {genre.name}
-                        </option>
-                    ))}
-                </select>
-                <button type="submit">Ver Recomendações</button>
-            </form>
+            <Layout headerTitle="Escolha seu Gênero Favorito">
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                    <CircularProgress /> 
+                    <p style={{marginLeft: 10}}>Carregando lista de gêneros...</p>
+                </Box>
+            </Layout>
         );
-    };
+    }
+
+    if (error && genres.length === 0) {
+        return (
+            <Layout headerTitle="Escolha seu Gênero Favorito">
+                <Alert severity="error" sx={{ my: 2, maxWidth: 600, mx: 'auto' }}>
+                    Erro ao carregar gêneros: {error}
+                </Alert>
+            </Layout>
+        );
+    }
+
 
     return (
         <Layout headerTitle="Escolha seu Gênero Favorito">
             <main>
-                {renderContent()}
+                <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, margin: '20px auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    
+                    <FormControl fullWidth variant="outlined">
+                        <InputLabel id="genre-select-label">Gênero</InputLabel>
+                        <Select
+                            labelId="genre-select-label"
+                            id="genreSelect"
+                            value={selectedGenre}
+                            label="Gênero"
+                            onChange={(e) => {
+                                setSelectedGenre(e.target.value);
+                                setError(null);
+                            }}
+                        >
+                            <MenuItem value="">
+                                <em>-- Escolha um gênero --</em>
+                            </MenuItem>
+                            
+                            {genres.map(genre => (
+                                <MenuItem key={genre.id} value={genre.id}>
+                                    {genre.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    {error && selectedGenre === '' && (
+                        <Alert severity="warning">Por favor, selecione um gênero.</Alert>
+                    )}
+
+                    <Button 
+                        type="submit" 
+                        variant="contained" 
+                        color="primary"
+                        size="large"
+                        startIcon={<MovieIcon />}
+                    >
+                        Ver Recomendações
+                    </Button>
+                </Box>
             </main>
         </Layout>
     );

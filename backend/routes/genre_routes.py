@@ -3,7 +3,7 @@ from services.tmdb_service import fetch_tmdb_data
 
 genre_bp = Blueprint("genres", __name__)
 
-@genre_bp.route("/genres", methods=["GET"])
+@genre_bp.route("/", methods=["GET"])
 def get_genres():
     try:
         data = fetch_tmdb_data("genre/movie/list")
