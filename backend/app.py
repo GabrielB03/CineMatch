@@ -7,6 +7,8 @@ from routes.rating_routes import rating_bp
 from routes.auth_routes import auth_bp
 from routes.movie_routes import movie_bp
 from routes.recommendation_routes import rec_bp
+from routes.user_routes import user_bp
+from routes.genre_routes import genre_bp
 
 def create_app():
     app = Flask(__name__, static_folder=Config.FRONTEND_PATH,
@@ -29,6 +31,8 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(movie_bp, url_prefix='/api/movies')
     app.register_blueprint(rec_bp, url_prefix='/api/recommendations')
+    app.register_blueprint(genre_bp, url_prefix='/api/genres')
+    app.register_blueprint(user_bp)
 
     with app.app_context():
         db.create_all()

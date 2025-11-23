@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import { FormControl, InputLabel, Select, MenuItem, Button, Box, CircularProgress, Alert } from '@mui/material';
 import MovieIcon from '@mui/icons-material/Movie';
 
-const API_BASE_URL = 'https://localhost:5000';
+const API_BASE_URL = 'https://localhost:5000/api';
 
 const GenreSelectionPage = () => {
     const [genres, setGenres] = useState([]);
@@ -54,7 +54,7 @@ const GenreSelectionPage = () => {
         return (
             <Layout headerTitle="Escolha seu Gênero Favorito">
                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-                    <CircularProgress /> 
+                    <CircularProgress />
                     <p style={{marginLeft: 10}}>Carregando lista de gêneros...</p>
                 </Box>
             </Layout>
@@ -76,7 +76,7 @@ const GenreSelectionPage = () => {
         <Layout headerTitle="Escolha seu Gênero Favorito">
             <main>
                 <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, margin: '20px auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    
+
                     <FormControl fullWidth variant="outlined">
                         <InputLabel id="genre-select-label">Gênero</InputLabel>
                         <Select
@@ -92,7 +92,7 @@ const GenreSelectionPage = () => {
                             <MenuItem value="">
                                 <em>-- Escolha um gênero --</em>
                             </MenuItem>
-                            
+
                             {genres.map(genre => (
                                 <MenuItem key={genre.id} value={genre.id}>
                                     {genre.name}
@@ -105,9 +105,9 @@ const GenreSelectionPage = () => {
                         <Alert severity="warning">Por favor, selecione um gênero.</Alert>
                     )}
 
-                    <Button 
-                        type="submit" 
-                        variant="contained" 
+                    <Button
+                        type="submit"
+                        variant="contained"
                         color="primary"
                         size="large"
                         startIcon={<MovieIcon />}

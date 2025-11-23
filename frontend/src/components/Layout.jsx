@@ -56,6 +56,9 @@ const Layout = ({ children, headerTitle }) => {
                                     <Button color="inherit" component={Link} to="/my-ratings">
                                         Minhas Notas
                                     </Button>
+                                    <Button color="inherit" component={Link} to="/users">
+                                        Comunidade
+                                    </Button>
                                     <Button color="inherit" component={Link} to="/genres">
                                         Gêneros
                                     </Button>

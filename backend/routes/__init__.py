@@ -7,6 +7,7 @@ from .genre_routes import genre_bp
 from .stats_routes import stats_bp
 from .watchlist_routes import watchlist_bp
 from .debug_routes import debug_bp
+from .user_routes import user_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -17,3 +18,4 @@ def register_routes(app):
     app.register_blueprint(stats_bp)
     app.register_blueprint(watchlist_bp)
     app.register_blueprint(debug_bp)
+    app.register_blueprint(user_bp)

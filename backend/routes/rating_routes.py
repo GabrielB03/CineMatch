@@ -88,6 +88,34 @@ def user_ratings():
     except Exception as e:
         return jsonify({"error": "Erro interno do servidor"}), 500
 
+@rating_bp.route("/user/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_user_ratings_by_id(user_id):
+    try:
+        ratings = db.session.query(Rating, Movie).join(
+            Movie, Rating.movie_id == Movie.id).filter(Rating.user_id == user_id).all()
+
+        result = [
+            {
+                "id": r.id,
+                "rating": r.rating,
+                "comment": r.comment if r.comment else None,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+                "updated_at": r.updated_at.isoformat() if r.updated_at else None,
+                "movie": {
+                    "id": m.id if m else None,
+                    "tmdb_id": m.tmdb_id if m else None,
+                    "title": m.title if m else "Filme Não Encontrado",
+                    "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{m.poster_path}" if m and m.poster_path else None,
+                    "overview": m.overview if m and m.overview else None,
+                },
+            }
+            for r, m in ratings
+        ]
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": "Erro interno do servidor"}), 500
+
 @rating_bp.route("/ratings/<int:rating_id>", methods=["PUT"])
 @jwt_required()
 def update_rating(rating_id):
