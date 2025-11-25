@@ -1,7 +1,12 @@
 # CineMatch
 
 ## Visão Geral
-CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de Graduação Interdisciplinar) do curso de Ciência da Computação. O foco é fornecer recomendações de filmes personalizadas e indicar suas plataformas de streaming disponíveis. A arquitetura utiliza Python/Flask para o backend (API Rest) e React.js com Vite para o frontend, garantindo uma interface moderna e dinâmica. O sistema é suportado pelo banco de dados PostgreSQL para persistência de dados. CineMatch transforma a experiência de descobrir e assistir filmes, tornando-a mais fácil e acessível.
+CineMatch é uma aplicação web Full Stack desenvolvida para o TGI (Trabalho de Graduação Interdisciplinar) do curso de Ciência da Computação. O foco é fornecer recomendações de filmes personalizadas e indicar suas plataformas de streaming disponíveis. A arquitetura utiliza Python/Flask para o backend (API Rest) e React.js com Vite para o frontend, garantindo uma interface moderna e responsiva. O sistema é suportado pelo banco de dados PostgreSQL para persistência de dados. CineMatch transforma a experiência de descobrir e assistir filmes, tornando-a mais fácil e acessível.
+
+O diferencial técnico do CineMatch reside na implementação de um Sistema de Recomendação Híbrida, que combina duas metodologias principais para maximizar a precisão e a diversidade das sugestões:
+
+1. **Filtragem Colaborativa (Collaborative Filtering):** Baseada na similaridade entre gostos de diferentes usuários e itens.
+2. **Filtragem Baseada em Conteúdo (Content-Based Filtering):** Baseada nas características intrínsecas dos filmes (metadados, sinopses, gêneros) que correspondem às preferências históricas do usuário.
 
 ## Funcionalidades
 - **Sistema de Recomendação Personalizada:** Algoritmo no backend que fornece recomendações de filmes com base nas preferências e histórico de avaliações de usuários.
@@ -197,3 +202,4 @@ http://localhost:5173
 ## Licença
 
 Esse projeto está licenciado sob a Licença MIT - veja o arquivo [LICENÇA](LICENSE) para mais detalhes.
+
