@@ -46,6 +46,16 @@ const HomePage = () => {
                     >
                         Explorar Gêneros
                     </Button>
+                    
+                    <Button 
+                        variant="text" 
+                        color="inherit" 
+                        size="large" 
+                        component={Link} 
+                        to="/register"
+                    >
+                        Registrar
+                    </Button>
                 </Box>
             </Box>
         </Layout>

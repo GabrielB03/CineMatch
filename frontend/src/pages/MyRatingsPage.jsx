@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { Container, Typography, Grid, Card, CardContent, CardMedia, Rating, TextField, Button, Box, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
-import { getToken } from '../utils/authApi';
+import { fetchWithAuth, removeToken } from '../utils/authApi';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:5000/api';
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const MyRatingsPage = () => {
     const [ratings, setRatings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editStates, setEditStates] = useState({});
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchRatings();
@@ -33,9 +36,11 @@ const MyRatingsPage = () => {
     };
 
     const handleRatingChange = (ratingId, newScore) => {
+        const rawScore = newScore * 2; 
+        
         setRatings(prevRatings => 
             prevRatings.map(r => 
-                r.id === ratingId ? { ...r, rating: newScore } : r
+                r.id === ratingId ? { ...r, rating: rawScore } : r
             )
         );
     };
@@ -59,45 +64,74 @@ const MyRatingsPage = () => {
         }));
     };
 
-    const handleSave = async (ratingId, newRating, newComment) => {
+    const handleSave = async (ratingId) => {
+        const ratingItem = ratings.find(r => r.id === ratingId);
+        if (!ratingItem) return;
+
         try {
-            const token = getToken();
-            await axios.put(`${API_URL}/ratings/ratings/${ratingId}`, {
-                rating: newRating,
-                comment: newComment || null,
-            }, {
-                withCredentials: true,
+            await fetchWithAuth(`ratings/ratings/${ratingId}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    rating: ratingItem.rating, 
+                    comment: ratingItem.comment || null, 
+                }),
             });
-            toggleEditMode(ratingId); 
+            
+            const { originalRating, originalComment, ...rest } = editStates[ratingId] || {};
+            setEditStates(prev => ({
+                ...prev,
+                [ratingId]: { ...rest, isEditing: false }
+            }));
         } catch (err) {
             console.error("Erro ao salvar avaliação:", err);
+            
+            if (err.message && err.message.includes("401")) { 
+                removeToken();
+                navigate('/login');
+                setError("Sessão expirada. Faça login novamente.");
+                return; 
+            }
+
             setError("Erro ao salvar a avaliação. Tente novamente.");
-            setRatings(prevRatings => 
-                prevRatings.map(r => 
-                    r.id === ratingId ? 
-                    { 
-                        ...r, 
-                        rating: editStates[ratingId].originalRating, 
-                        comment: editStates[ratingId].originalComment 
-                    } : r
-                )
-            );
+            
+            const original = editStates[ratingId];
+            if (original) {
+                 setRatings(prevRatings => 
+                    prevRatings.map(r => 
+                        r.id === ratingId ? 
+                        { 
+                            ...r, 
+                            rating: original.originalRating, 
+                            comment: original.originalComment 
+                        } : r
+                    )
+                );
+            }
+            setEditStates(prev => ({
+                ...prev,
+                [ratingId]: { ...prev[ratingId], isEditing: false }
+            }));
         }
     };
 
     const handleCancel = (ratingId) => {
         const original = editStates[ratingId];
-        setRatings(prevRatings => 
-            prevRatings.map(r => 
-                r.id === ratingId ? 
-                { 
-                    ...r, 
-                    rating: original.originalRating, 
-                    comment: original.originalComment 
-                } : r
-            )
-        );
-        toggleEditMode(ratingId);
+        if (original) {
+             setRatings(prevRatings => 
+                prevRatings.map(r => 
+                    r.id === ratingId ? 
+                    { 
+                        ...r, 
+                        rating: original.originalRating, 
+                        comment: original.originalComment 
+                    } : r
+                )
+            );
+        }
+        setEditStates(prev => ({
+            ...prev,
+            [ratingId]: { ...prev[ratingId], isEditing: false }
+        }));
     };
 
     if (loading) {
@@ -120,8 +154,6 @@ const MyRatingsPage = () => {
                             
                             const rawRating = item.rating; 
                             const convertedRating = rawRating / 2; 
-
-                            const currentRating = isEditing ? rawRating : convertedRating;
                             const currentComment = item.comment;
 
                             return (
@@ -186,7 +218,7 @@ const MyRatingsPage = () => {
                                                         variant="contained" 
                                                         color="primary" 
                                                         size="small"
-                                                        onClick={() => handleSave(item.id, currentRating, currentComment)}
+                                                        onClick={() => handleSave(item.id)}
                                                         sx={{ mr: 1 }}
                                                     >
                                                         Salvar

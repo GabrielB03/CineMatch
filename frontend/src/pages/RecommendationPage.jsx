@@ -3,18 +3,22 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import StarRating from '../components/StarRating';
 import { fetchWithAuth, removeToken, getToken } from '../utils/authApi';
-import { CircularProgress, Button, Box, Pagination } from '@mui/material';
+import { CircularProgress, Button, Box, Pagination, Snackbar, Alert } from '@mui/material';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const API_BASE_URL = 'https://localhost:5000/api';
 const MOVIES_PER_PAGE = 30;
-const TOTAL_PAGES_PLACEHOLDER = 10; 
 
 const RecommendationPage = () => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [error, setError] = useState(null);
+    const [totalCount, setTotalCount] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -38,11 +42,11 @@ const RecommendationPage = () => {
             response = await fetch(API_BASE_URL + finalEndpoint, {
                 headers: { "Content-Type": "application/json" },
                 credentials: 'include',
-            }); 
+            });
         }
         
         if (!response.ok) {
-             throw new Error(`Erro ${response.status}: Falha na requisição da API.`);
+            throw new Error(`Erro ${response.status}: Falha na requisição da API.`);
         }
         
         const contentType = response.headers.get("content-type");
@@ -59,6 +63,10 @@ const RecommendationPage = () => {
         if (response.ok && Array.isArray(results)) {
             const newMovies = results.map(m => m.movie ? m.movie : m);
             
+            const count = data.total_count || newMovies.length;
+            setTotalCount(count);
+            setTotalPages(Math.ceil(count / MOVIES_PER_PAGE) || 1);
+            
             return newMovies;
         } else {
             return [];
@@ -66,10 +74,10 @@ const RecommendationPage = () => {
     }, []);
     
     const loadMovies = useCallback(async (currentPage) => {
-        const fetcher = currentFetcher || fetch;
+        const fetcher = currentFetcher;
         const endpoint = currentEndpoint;
         
-        if (!endpoint) return;
+        if (!endpoint || !fetcher) return;
 
         setLoading(true);
         setError(null);
@@ -77,7 +85,6 @@ const RecommendationPage = () => {
 
         try {
             const newMovies = await executeFetch(endpoint, fetcher, currentPage);
-            
             setMovies(newMovies);
             
         } catch (err) {
@@ -117,8 +124,9 @@ const RecommendationPage = () => {
                 title = "Suas Recomendações Personalizadas";
                 isPersonalizedAttempt = true;
             } else {
-                navigate('/login');
-                return;
+                endpoint = "/movies/catalog"; 
+                fetcher = fetch;
+                title = "Catálogo Completo (A-Z)";
             }
             
             setPageTitle(title);
@@ -169,11 +177,11 @@ const RecommendationPage = () => {
         };
 
         loadInitialConfig();
-    }, [navigate, genreId, location.search]);
+    }, [navigate, genreId, location.search, executeFetch]);
     
     useEffect(() => {
         if (currentEndpoint) {
-             loadMovies(pageFromUrl);
+            loadMovies(pageFromUrl);
         }
     }, [pageFromUrl, currentEndpoint, loadMovies]);
 
@@ -186,11 +194,44 @@ const RecommendationPage = () => {
         
         navigate(`${location.pathname}${newSearch}`);
     };
+    
+    const handleAddToWishlist = async (tmdbId) => {
+        if (!getToken()) {
+            setSnackbarMessage("Faça login para adicionar filmes à sua Wishlist.");
+            setSnackbarOpen(true);
+            return;
+        }
+        try {
+            const response = await fetchWithAuth(`user/watchlist/add/${tmdbId}`, {
+                method: 'POST',
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Falha ao adicionar à Wishlist.");
+            }
+
+            setSnackbarMessage("Adicionado à Wishlist com sucesso!");
+            setSnackbarOpen(true);
+        } catch (err) {
+            setSnackbarMessage(err.message);
+            setSnackbarOpen(true);
+        }
+    };
+    
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbarOpen(false);
+    };
 
     if (loading && movies.length === 0) {
         return (
             <Layout headerTitle={pageTitle}>
                 <div className="empty-message">
+                    <CircularProgress />
                     <h2>Carregando recomendações...</h2>
                 </div>
             </Layout>
@@ -227,7 +268,7 @@ const RecommendationPage = () => {
                 </div>
             )}
             
-            <h2>{pageTitle}</h2>
+            <h2 style={{ marginBottom: '20px' }}>Resultados ({totalCount} itens)</h2>
             <div className="card-grid" id="recommendationsList">
                 {movies.map((movie) => {
                     const showRating = !!getToken();
@@ -249,9 +290,16 @@ const RecommendationPage = () => {
                                         initialRating={movie.user_rating || 0} 
                                     />
                                 )}
-                                {movie.watch_providers && (
-                                    <p className="watch-providers">Onde assistir: {movie.watch_providers}</p>
-                                )}
+                                <Button 
+                                    variant="contained" 
+                                    color="secondary" 
+                                    size="small"
+                                    startIcon={<FavoriteBorderIcon />}
+                                    onClick={() => handleAddToWishlist(movie.tmdb_id)}
+                                    sx={{ mt: 1 }}
+                                >
+                                    Wishlist
+                                </Button>
                             </div>
                         </div>
                     );
@@ -260,7 +308,7 @@ const RecommendationPage = () => {
             
             <Box sx={{ textAlign: 'center', my: 4 }}>
                 <Pagination
-                    count={TOTAL_PAGES_PLACEHOLDER}
+                    count={totalPages}
                     page={pageFromUrl}
                     onChange={handlePageChange}
                     color="primary"
@@ -268,6 +316,12 @@ const RecommendationPage = () => {
                     size="large"
                 />
             </Box>
+            
+            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+                <Alert onClose={handleSnackbarClose} severity="info" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Layout>
     );
 };

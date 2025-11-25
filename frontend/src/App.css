@@ -275,6 +275,25 @@ body.dark-mode header nav button {
   color: var(--text-color) !important;
 }
 
+body.dark-mode .error-message {
+  color: #FFCDD2;
+  background-color: #5C1E1E;
+}
+
+body.dark-mode .empty-message {
+  background-color: #3A3A3A;
+  color: var(--text-color);
+}
+
+.empty-message .MuiButton-containedPrimary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.empty-message .MuiButton-containedPrimary:hover {
+  background-color: var(--color-primary-hover);
+}
+
 .theme-switch-wrapper {
   display: flex;
   align-items: center;

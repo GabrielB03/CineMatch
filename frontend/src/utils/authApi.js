@@ -68,7 +68,10 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
     mergedOptions.headers["X-CSRF-TOKEN"] = csrfToken;
   }
 
-  const url = `${API_BASE_URL}${endpoint}`;
+  const cleanedEndpoint = endpoint.startsWith("/")
+    ? endpoint.substring(1)
+    : endpoint;
+  const url = `${API_BASE_URL}/${cleanedEndpoint}`;
 
   const response = await fetch(url, mergedOptions);
 
@@ -77,11 +80,15 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
   }
 
   if (!response.ok) {
-    const errorData = await response
-      .json()
-      .catch(() => ({ message: response.statusText }));
+    let errorMessage = response.statusText;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorData.error || errorMessage;
+    } catch (e) {
+      console.error("Não foi possível ler o corpo do erro como JSON:", e);
+    }
 
-    throw new Error(`${response.status}: ${errorData.message}`);
+    throw new Error(`${response.status}: ${errorMessage}`);
   }
 
   return response;

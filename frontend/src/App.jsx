@@ -10,6 +10,7 @@ import AccountPage from './pages/AccountPage';
 import MyRatingsPage from './pages/MyRatingsPage';
 import UserListPage from './pages/UserListPage';
 import UserProfilePage from './pages/UserProfilePage';
+import WishlistPage from './pages/WishlistPage';
 
 function App() {
   return (
@@ -20,11 +21,13 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/genres" element={<GenreSelectionPage />} />
+          <Route path="/catalog" element={<GenreSelectionPage />} />
           <Route path="/recommendations" element={<RecommendationPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/my-ratings" element={<MyRatingsPage />} />
           <Route path="/users" element={<UserListPage />} />
           <Route path="/users/:userId" element={<UserProfilePage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </div>

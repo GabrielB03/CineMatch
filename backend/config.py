@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 
@@ -16,16 +17,16 @@ class Config:
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'chave_padrao_insegura')
     JWT_TOKEN_LOCATION = ["cookies"]
 
-    JWT_COOKIE_SECURE = True
-    JWT_COOKIE_SAMESITE = 'None'
+    JWT_COOKIE_SECURE = False
+    JWT_COOKIE_SAMESITE = 'Lax'
 
     JWT_COOKIE_CSRF_PROTECT = True
 
     JWT_ACCESS_CSRF_COOKIE_HTTPONLY = False
-    JWT_ACCESS_CSRF_COOKIE_SECURE = True
-    JWT_ACCESS_CSRF_COOKIE_SAMESITE = 'None'
+    JWT_ACCESS_CSRF_COOKIE_SECURE = False
+    JWT_ACCESS_CSRF_COOKIE_SAMESITE = 'Lax'
 
-    JWT_ACCESS_TOKEN_EXPIRES = 3600
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
 
     TMDB_API_KEY = os.getenv('TMDB_API_KEY', 'SUA_CHAVE_TMDB')
     TMDB_BASE_URL = "https://api.themoviedb.org/3"

@@ -5,7 +5,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
 from extensions import db
-from models import Movie, Rating
+from models.movie import Movie
+from models.rating import Rating
 from config import Config
 from utils.constants import GENRE_ID_TO_NAME, NotEnoughRatingsError
 import random
@@ -229,29 +230,37 @@ class RecommendationEngine:
 
     def get_popular_movies(self, top_n=10, offset=0):
         try:
+            query = Movie.query.order_by(Movie.popularity.desc())
+
+            total_count = query.count()
+
             movies = (
-                Movie.query.order_by(Movie.popularity.desc())
+                query
                 .limit(top_n)
                 .offset(offset)
                 .all()
             )
             random.shuffle(movies)
 
-            return self._load_movie_details(movies)
+            return self._load_movie_details(movies, total_count)
 
         except Exception as e:
             print(f"❌ Erro ao buscar filmes populares {e}")
-            return []
+            return {"movies": [], "total_count": 0}
 
-    def get_movies_by_genre(self, genre_id, top_n=10, offset=0):
+    def get_movies_by_genre(self, genre_id, top_n=10, offset=0, include_count=False):
         try:
             genre_name = GENRE_ID_TO_NAME.get(genre_id)
 
             if not genre_name:
-                return []
+                return {"movies": [], "total_count": 0}
+
+            query = Movie.query.filter(Movie.genres.ilike(f"%{genre_name}%"))
+
+            total_count = query.count()
 
             movies = (
-                Movie.query.filter(Movie.genres.ilike(f"%{genre_name}%"))
+                query
                 .order_by(Movie.release_date.desc())
                 .limit(top_n)
                 .offset(offset)
@@ -259,16 +268,15 @@ class RecommendationEngine:
             )
             random.shuffle(movies)
 
-            return self._load_movie_details(movies)
+            return self._load_movie_details(movies, total_count)
 
         except Exception as e:
             print(f"❌ Erro ao buscar filmes por gênero {genre_id}: {e}")
-            return []
+            return {"movies": [], "total_count": 0}
 
-    def _load_movie_details(self, movies):
-
+    def _load_movie_details(self, movies, total_count):
         for movie in movies:
             movie.user_rating = 0
             movie.watch_providers = getattr(movie, 'watch_providers', None)
 
-        return movies
+        return {"movies": movies, "total_count": total_count}

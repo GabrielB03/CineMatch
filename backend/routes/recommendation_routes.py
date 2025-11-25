@@ -51,11 +51,13 @@ def get_main_recommendations():
     try:
         all_recs = engine.hybrid_recommendations(user_id)
 
+        total_count = len(all_recs)
+
         start = offset
         end = offset + top_n
         recs = all_recs[start:end]
 
-        return jsonify({"recommendations": [format_rec(r) for r in recs]}), 200
+        return jsonify({"recommendations": [format_rec(r) for r in recs], "total_count": total_count}), 200
 
     except NotEnoughRatingsError as e:
         print(f"⚠️ Usuário {user_id} sem avaliações suficientes: {e.message}")
@@ -78,10 +80,13 @@ def popular_movies():
         return jsonify({"message": "Os parâmetros 'limit' e 'page' devem ser números inteiros."}), 400
 
     try:
-        movies = engine.get_popular_movies(top_n=limit, offset=offset)
+        result = engine.get_popular_movies(
+            top_n=limit, offset=offset, include_count=True)
+        movies = result["movies"]
+        total_count = result["total_count"]
 
         formatted_movies = [format_movie(m) for m in movies]
-        return jsonify({"movies": formatted_movies}), 200
+        return jsonify({"movies": formatted_movies, "total_count": total_count}), 200
 
     except Exception as e:
         print(f"❌ Erro ao obter filmes populares: {e}")
@@ -102,12 +107,13 @@ def content_based():
         return jsonify({"message": "Os parâmetros 'limit' e 'page' devem ser números inteiros."}), 400
 
     all_recs = engine.collaborative_filtering_recommendations(user_id)
+    total_count = len(all_recs)
 
     start = offset
     end = offset + top_n
     recs = all_recs[start:end]
 
-    return jsonify({"recommendations": [format_rec(r) for r in recs]}), 200
+    return jsonify({"recommendations": [format_rec(r) for r in recs], "total_count": total_count}), 200
 
 @rec_bp.route("/hybrid", methods=["GET"])
 @jwt_required()
@@ -124,12 +130,13 @@ def hybrid():
         return jsonify({"message": "Os parâmetros 'limit' e 'page' devem ser números inteiros."}), 400
 
     all_recs = engine.hybrid_recommendations(user_id)
+    total_count = len(all_recs)
 
     start = offset
     end = offset + top_n
     recs = all_recs[start:end]
 
-    return jsonify({"recommendations": [format_rec(r) for r in recs]}), 200
+    return jsonify({"recommendations": [format_rec(r) for r in recs], "total_count": total_count}), 200
 
 @rec_bp.route("/genre", methods=["GET"])
 def get_recommendations_by_genre():
@@ -145,17 +152,20 @@ def get_recommendations_by_genre():
     except ValueError:
         return jsonify({"message": "Os parâmetros 'limit' e 'genre_id' devem ser números inteiros."}), 400
 
+    if not genre_id:
+        return jsonify({"message": "O parâmetro 'genre_id' é obrigatório."}), 400
+
     try:
-        if genre_id:
-            movies = engine.get_movies_by_genre(
-                genre_id, top_n=limit, offset=offset)
-        else:
-            movies = engine.get_popular_movies(top_n=limit, offset=offset)
+        result = engine.get_movies_by_genre(
+            genre_id, top_n=limit, offset=offset, include_count=True)
+
+        movies = result["movies"]
+        total_count = result["total_count"]
 
         formatted_movies = [format_movie(m) for m in movies]
 
-        return jsonify({"movies": formatted_movies}), 200
+        return jsonify({"movies": formatted_movies, "total_count": total_count}), 200
 
     except Exception as e:
         print(f"❌ Erro ao buscar filmes por Gênero: {e}")
-        return jsonify({"message": f"Erro interno ao buscar filmes: {e}"}), 500
+        return jsonify({"message": f"Erro interno ao buscar filmes por Gênero: {e}"}), 500

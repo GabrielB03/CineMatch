@@ -7,8 +7,12 @@ from routes.rating_routes import rating_bp
 from routes.auth_routes import auth_bp
 from routes.movie_routes import movie_bp
 from routes.recommendation_routes import rec_bp
-from routes.user_routes import user_bp
 from routes.genre_routes import genre_bp
+from routes.user_routes import user_bp
+from routes.watchlist_routes import watchlist_bp
+from routes.stats_routes import stats_bp
+from routes.debug_routes import debug_bp
+
 
 def create_app():
     app = Flask(__name__, static_folder=Config.FRONTEND_PATH,
@@ -32,7 +36,10 @@ def create_app():
     app.register_blueprint(movie_bp, url_prefix='/api/movies')
     app.register_blueprint(rec_bp, url_prefix='/api/recommendations')
     app.register_blueprint(genre_bp, url_prefix='/api/genres')
-    app.register_blueprint(user_bp)
+    app.register_blueprint(user_bp, url_prefix='/api/users')
+    app.register_blueprint(watchlist_bp, url_prefix='/api/user/watchlist')
+    app.register_blueprint(stats_bp, url_prefix='/api/stats')
+    app.register_blueprint(debug_bp, url_prefix='/api/debug')
 
     with app.app_context():
         db.create_all()
@@ -44,6 +51,7 @@ def create_app():
         return jsonify({"error": "index.html não encontrado."}), 404
 
     return app
+
 
 if __name__ == '__main__':
     app = create_app()
@@ -62,7 +70,6 @@ if __name__ == '__main__':
             ssl_context=(CERT_FILE, KEY_FILE)
         )
     else:
-        print("AVISO: Arquivos SSL não encontrados (localhost+1.pem e localhost+1-key.pem). Rodando em HTTP.")
         app.run(
             host="0.0.0.0",
             port=FLASK_PORT,

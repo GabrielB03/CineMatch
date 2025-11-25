@@ -4,6 +4,8 @@ import Layout from '../components/Layout';
 import { TextField, Button, Box, Paper, Typography, Alert } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
+const API_BASE_URL = 'https://localhost:5000/api';
+
 const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
@@ -22,7 +24,7 @@ const RegisterPage = () => {
         }
 
         try {
-            const res = await fetch("https://localhost:5000/auth/register", {
+            const res = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, email, password }),
@@ -32,8 +34,6 @@ const RegisterPage = () => {
 
             if (res.ok) {
                 setMessage(data.message || "Registro concluído com sucesso!");
-                console.log("Registro realizado com sucesso!");
-
                 setTimeout(() => {
                     navigate('/login');
                 }, 2000);
@@ -41,8 +41,7 @@ const RegisterPage = () => {
                 setMessage(data.message || "Erro ao registrar. Tente novamente.");
             }
         } catch (err) {
-            console.error("Erro no registro:", err);
-            setMessage("Erro de conexão. Verifique se o backend está rodando.");
+            setMessage("Erro de conexão. Verifique se o backend está rodando e se a rota /api/auth/register está acessível.");
         }
     };
 

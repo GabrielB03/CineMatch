@@ -1,61 +1,47 @@
-from flask import Blueprint, jsonify, current_app, request
+from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
-from utils.database import get_db_connection
+from models.user import User
+from extensions import db
 
-user_bp = Blueprint('users', __name__, url_prefix='/api')
+user_bp = Blueprint('users', __name__, url_prefix='/users')
 
-@user_bp.route('/users', methods=['GET'])
+@user_bp.route('', methods=['GET'])
 @jwt_required()
 def list_users():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
     try:
-        query = "SELECT id, username FROM \"user\" ORDER BY id"
-        cursor.execute(query)
-        users_data = cursor.fetchall()
+        users_data = User.query.with_entities(
+            User.id, User.username).order_by(User.id).all()
+
         users_list = []
-        for user in users_data:
+        for id, username in users_data:
             users_list.append({
-                'id': user[0],
-                'username': user[1]
+                'id': id,
+                'username': username
             })
+
         return jsonify(users_list), 200
 
     except Exception as e:
-        current_app.logger.error(f"DATABASE ERROR: {e}")
+        print(f"❌ Erro interno ao buscar usuários (SQLAlchemy): {e}")
         return jsonify({'message': 'Erro interno ao buscar usuários'}), 500
 
-    finally:
-        cursor.close()
-        conn.close()
-
-@user_bp.route('/users/<int:user_id>', methods=['GET'])
+@user_bp.route('/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user_profile(user_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
     try:
-        query = "SELECT id, username, email FROM \"user\" WHERE id = %s"
-        cursor.execute(query, (user_id,))
-        user_data = cursor.fetchone()
+        user = User.query.filter_by(id=user_id).first()
 
-        if user_data is None:
+        if user is None:
             return jsonify({'message': 'Usuário não encontrado'}), 404
 
         user_profile = {
-            'id': user_data[0],
-            'username': user_data[1],
-            'email': user_data[2]
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
         }
 
         return jsonify(user_profile), 200
 
     except Exception as e:
-        current_app.logger.error(f"DATABASE ERROR: {e}")
+        print(f"❌ Erro interno ao buscar perfil (SQLAlchemy): {e}")
         return jsonify({'message': 'Erro interno ao buscar perfil'}), 500
-
-    finally:
-        cursor.close()
-        conn.close()
