@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchWithAuth, getToken } from '../utils/authApi';
-import { Alert, Box } from '@mui/material';
+import { Alert, Box, Rating } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import { Typography } from '@mui/material';
 
+const API_BASE_URL = 'https://localhost:5000/api';
 
-const StarRating = ({ tmdbId, initialRating = 0 }) => {
+const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
     const initialStars = Math.round(initialRating / 2);
 
     const [savedRating, setSavedRating] = useState(initialStars);
     const [hoverRating, setHoverRating] = useState(0);
     const [feedback, setFeedback] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
     const navigate = useNavigate();
 
     const handleRatingClick = async (rating) => {
         setFeedback(null);
-
+        setIsSaving(true);
+        
         const token = getToken();
         if (!token) {
             setFeedback({ message: "Você precisa estar logado para avaliar.", type: 'error' });
+            setIsSaving(false);
             setTimeout(() => navigate('/login'), 2000);
             return;
         }
@@ -29,35 +34,50 @@ const StarRating = ({ tmdbId, initialRating = 0 }) => {
         };
 
         try {
-            const response = await fetchWithAuth(`/movies/${tmdbId}/rate`, {
+            const endpoint = `/ratings/${contentType}/${tmdbId}/rate`;
+            
+            const response = await fetchWithAuth(endpoint, {
                 method: "POST",
                 body: JSON.stringify(ratingData),
             });
 
-            if (response.ok) {
-                setSavedRating(rating);
-                setFeedback({ message: "Avaliação salva com sucesso!", type: 'success' });
-            } else {
-                const errorData = await response.json().catch(() => ({ message: response.statusText }));
-                throw new Error(errorData.message);
+            if (response.status === 401) {
+                navigate('/login');
+                return;
             }
+
+            const data = await response.json().catch(() => ({ message: response.statusText }));
+
+            if (!response.ok) {
+                throw new Error(data.error || data.message || "Falha ao salvar a avaliação.");
+            }
+
+            setSavedRating(rating);
+            setFeedback({ message: "Avaliação salva com sucesso!", type: 'success' });
+            
         } catch (error) {
-            console.error("Erro ao salvar avaliação", error);
+            console.error(`Erro ao salvar avaliação de ${contentType}`, error);
 
             let errorMessage = "Erro ao salvar avaliação. ";
             if (error.message.includes("Token expirado")) {
                 errorMessage = "Sessão expirada. Faça login novamente";
+            } else if (error.message.includes("não encontrado")) {
+                errorMessage = `${contentType.toUpperCase()} não encontrado no catálogo. Tente mais tarde.`;
             } else {
                 errorMessage += error.message;
             }
 
             setFeedback({ message: errorMessage, type: 'error' });
             setHoverRating(0);
+            setSavedRating(initialStars);
+        } finally {
+            setIsSaving(false);
+            setTimeout(() => setFeedback(null), 5000);
         }
     };
 
     return (
-        <Box className="star-rating" sx={{ position: 'relative', display: 'inline-flex', gap: 0.5 }}>
+        <Box className="star-rating" sx={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
             
             {feedback && (
                 <Alert 
@@ -69,34 +89,46 @@ const StarRating = ({ tmdbId, initialRating = 0 }) => {
                         transform: 'translateX(-50%)', 
                         zIndex: 1000,
                         maxWidth: 300,
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        p: 0.5 
                     }}
                 >
                     {feedback.message}
                 </Alert>
             )}
 
-            {[...Array(5)].map((_, index) => {
-                const ratingValue = index + 1;
+            <Box sx={{ display: 'inline-flex', gap: 0.5 }}>
+                {[...Array(5)].map((_, index) => {
+                    const ratingValue = index + 1;
 
-                const isActive = ratingValue <= (hoverRating || savedRating);
+                    const currentRating = hoverRating || savedRating;
+                    const isActive = ratingValue <= currentRating;
 
-                const Star = isActive ? StarIcon : StarOutlineIcon;
+                    const StarComponent = isActive ? StarIcon : StarOutlineIcon;
 
-                return (
-                    <Star
-                        key={index}
-                        onClick={() => handleRatingClick(ratingValue)}
-                        onMouseEnter={() => setHoverRating(ratingValue)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        sx={{
-                            cursor: 'pointer',
-                            color: isActive ? 'gold' : 'gray',
-                            fontSize: 28
-                        }}
-                    />
-                );
-            })}
+                    return (
+                        <StarComponent
+                            key={index}
+                            onClick={() => handleRatingClick(ratingValue)}
+                            onMouseEnter={() => setHoverRating(ratingValue)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            sx={{
+                                cursor: isSaving ? 'not-allowed' : 'pointer',
+                                color: isActive ? 'gold' : 'gray',
+                                fontSize: 28,
+                                opacity: isSaving ? 0.7 : 1
+                            }}
+                        />
+                    );
+                })}
+            </Box>
+            {isSaving && <Typography variant="caption" color="primary">Salvando...</Typography>}
+            
+            {savedRating > 0 && !isSaving && (
+                <Typography variant="caption" color="text.secondary">
+                    ({savedRating * 2}/10)
+                </Typography>
+            )}
         </Box>
     );
 };

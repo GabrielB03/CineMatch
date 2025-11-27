@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { Container, Typography, Grid, Card, CardContent, CardMedia, Rating, TextField, Button, Box, CircularProgress, Alert } from '@mui/material';
+import { Container, Typography, Grid, Card, CardContent, CardMedia, Rating, TextField, Button, Box, CircularProgress, Alert, Tabs, Tab } from '@mui/material';
 import axios from 'axios';
 import { fetchWithAuth, removeToken } from '../utils/authApi';
 import { useNavigate } from 'react-router-dom';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:5000/api';
+const API_URL = 'https://localhost:5000/api';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const MyRatingsPage = () => {
@@ -13,6 +14,7 @@ const MyRatingsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editStates, setEditStates] = useState({});
+    const [tabValue, setTabValue] = useState(0); 
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -134,6 +136,29 @@ const MyRatingsPage = () => {
         }));
     };
 
+    const handleDelete = async (ratingId) => {
+        if (!window.confirm("Tem certeza que deseja remover esta avaliação?")) return;
+
+        try {
+            await fetchWithAuth(`ratings/ratings/${ratingId}`, {
+                method: 'DELETE',
+            });
+            
+            setRatings(prevRatings => prevRatings.filter(r => r.id !== ratingId));
+            setError("Avaliação removida com sucesso!");
+
+        } catch (err) {
+             console.error("Erro ao deletar avaliação:", err);
+             setError("Erro ao remover a avaliação. Tente novamente.");
+        }
+    };
+
+    const filteredRatings = ratings.filter(item => 
+        tabValue === 0 ? item.content_type === 'movie' : item.content_type === 'tv'
+    );
+    
+    const contentTitle = tabValue === 0 ? "Filmes Avaliados" : "Séries Avaliadas";
+
     if (loading) {
         return <Layout headerTitle="Minhas Avaliações"><Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box></Layout>;
     }
@@ -141,15 +166,24 @@ const MyRatingsPage = () => {
     return (
         <Layout headerTitle="Minhas Avaliações">
             <Container maxWidth="lg">
-                <Typography variant="h4" gutterBottom>Seus Filmes Avaliados</Typography>
+                <Typography variant="h4" gutterBottom>Gerenciar Suas Notas</Typography>
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
                 
-                {ratings.length === 0 ? (
-                    <Typography variant="body1">Você ainda não avaliou nenhum filme. Comece a explorar!</Typography>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
+                    <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} aria-label="content type tabs">
+                        <Tab label={`Filmes (${ratings.filter(r => r.content_type === 'movie').length})`} />
+                        <Tab label={`Séries (${ratings.filter(r => r.content_type === 'tv').length})`} />
+                    </Tabs>
+                </Box>
+                
+                <Typography variant="h5" gutterBottom>{contentTitle}</Typography>
+                
+                {filteredRatings.length === 0 ? (
+                    <Typography variant="body1">Você ainda não avaliou {contentTitle.toLowerCase()}.</Typography>
                 ) : (
                     <Grid container spacing={4}>
-                        {ratings.map((item) => {
-                            const movie = item.movie;
+                        {filteredRatings.map((item) => {
+                            const content = item.content;
                             const isEditing = editStates[item.id]?.isEditing;
                             
                             const rawRating = item.rating; 
@@ -162,12 +196,12 @@ const MyRatingsPage = () => {
                                         <CardMedia
                                             component="img"
                                             sx={{ width: 100, flexShrink: 0 }}
-                                            image={movie.poster_path || 'placeholder.png'}
-                                            alt={movie.title}
+                                            image={content.poster_path || 'placeholder.png'}
+                                            alt={content.title}
                                         />
                                         <CardContent sx={{ flexGrow: 1 }}>
                                             <Typography variant="h6" component="div" gutterBottom>
-                                                {movie.title}
+                                                {content.title}
                                             </Typography>
 
                                             <Typography variant="subtitle2" color="text.secondary">
@@ -201,6 +235,7 @@ const MyRatingsPage = () => {
                                                     multiline
                                                     rows={2}
                                                     value={currentComment || ''}
+                                                    label="Seu Comentário"
                                                     onChange={(e) => handleCommentChange(item.id, e.target.value)}
                                                     variant="outlined"
                                                     size="small"
@@ -232,13 +267,24 @@ const MyRatingsPage = () => {
                                                     </Button>
                                                 </Box>
                                             ) : (
-                                                <Button 
-                                                    variant="outlined" 
-                                                    size="small"
-                                                    onClick={() => toggleEditMode(item.id, rawRating, currentComment)}
-                                                >
-                                                    Editar
-                                                </Button>
+                                                <Box display="flex" justifyContent="space-between">
+                                                    <Button 
+                                                        variant="outlined" 
+                                                        size="small"
+                                                        onClick={() => toggleEditMode(item.id, rawRating, currentComment)}
+                                                    >
+                                                        Editar
+                                                    </Button>
+                                                    <Button 
+                                                        variant="text" 
+                                                        color="error"
+                                                        size="small"
+                                                        startIcon={<DeleteIcon />}
+                                                        onClick={() => handleDelete(item.id)}
+                                                    >
+                                                        Remover
+                                                    </Button>
+                                                </Box>
                                             )}
                                         </CardContent>
                                     </Card>

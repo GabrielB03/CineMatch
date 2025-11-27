@@ -10,13 +10,11 @@ import traceback
 
 movie_bp = Blueprint("movies", __name__, url_prefix="/movies")
 
-
 @movie_bp.route("/by-genre/<int:genre_id>", methods=["GET"])
 def movies_by_genre(genre_id):
     page = int(request.args.get("page", 1))
     results = get_movies_by_genre(genre_id, page)
     return (jsonify(results), 200) if results else (jsonify({"error": "Erro ao obter filmes por gênero"}), 500)
-
 
 @movie_bp.route("/search", methods=["GET"])
 def search_movies():
@@ -35,7 +33,6 @@ def popular_movies():
     page = int(request.args.get("page", 1))
     results = get_popular_movies(page)
     return (jsonify(results), 200) if results else (jsonify({"error": "Erro ao obter filmes populares"}), 500)
-
 
 @movie_bp.route("/catalog", methods=["GET"])
 def get_all_movies_catalog():
@@ -68,7 +65,6 @@ def get_all_movies_catalog():
         print(f"❌ Erro ao obter catálogo de filmes: {e}")
         return jsonify({"error": "Erro interno ao buscar catálogo de filmes"}), 500
 
-
 @movie_bp.route("/<int:tmdb_id>/details", methods=["GET"])
 def movie_details(tmdb_id):
     movie = Movie.query.filter_by(tmdb_id=tmdb_id).first()
@@ -91,7 +87,6 @@ def movie_details(tmdb_id):
             "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{movie.poster_path}" if movie.poster_path else None,
         }
     )
-
 
 @movie_bp.route("/<int:tmdb_id>/rate", methods=["POST"])
 @jwt_required()

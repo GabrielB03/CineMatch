@@ -6,13 +6,13 @@ from flask_cors import CORS
 from routes.rating_routes import rating_bp
 from routes.auth_routes import auth_bp
 from routes.movie_routes import movie_bp
+from routes.tv_show_routes import tv_bp
 from routes.recommendation_routes import rec_bp
 from routes.genre_routes import genre_bp
 from routes.user_routes import user_bp
 from routes.watchlist_routes import watchlist_bp
 from routes.stats_routes import stats_bp
 from routes.debug_routes import debug_bp
-
 
 def create_app():
     app = Flask(__name__, static_folder=Config.FRONTEND_PATH,
@@ -24,16 +24,17 @@ def create_app():
     jwt.init_app(app)
 
     CORS(app, resources={
-         r"/*": {"origins": [
-             "http://localhost:5173",
-             "http://127.0.0.1:5173",
-             "https://localhost:5173",
-             "https://127.0.0.1:5173"
-         ]}}, supports_credentials=True)
+        r"/*": {"origins": [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://localhost:5173",
+            "https://127.0.0.1:5173"
+        ]}}, supports_credentials=True)
 
     app.register_blueprint(rating_bp, url_prefix='/api/ratings')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(movie_bp, url_prefix='/api/movies')
+    app.register_blueprint(tv_bp, url_prefix='/api/tv_shows')
     app.register_blueprint(rec_bp, url_prefix='/api/recommendations')
     app.register_blueprint(genre_bp, url_prefix='/api/genres')
     app.register_blueprint(user_bp, url_prefix='/api/users')
@@ -51,7 +52,6 @@ def create_app():
         return jsonify({"error": "index.html não encontrado."}), 404
 
     return app
-
 
 if __name__ == '__main__':
     app = create_app()

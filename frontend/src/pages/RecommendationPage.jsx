@@ -25,6 +25,7 @@ const RecommendationPage = () => {
     const queryParams = new URLSearchParams(location.search);
     const genreId = queryParams.get('genre');
     const pageFromUrl = parseInt(queryParams.get('page')) || 1;
+    const contentTypeFromUrl = queryParams.get('type') || 'movie';
 
     const [pageTitle, setPageTitle] = useState("Recomendações");
     const [currentFetcher, setCurrentFetcher] = useState(null);
@@ -49,25 +50,25 @@ const RecommendationPage = () => {
             throw new Error(`Erro ${response.status}: Falha na requisição da API.`);
         }
         
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
+        const contentTypeHeader = response.headers.get("content-type");
+        if (!contentTypeHeader || !contentTypeHeader.includes("application/json")) {
             const textError = await response.text();
             console.error("Resposta não é JSON:", textError);
-            throw new Error(`Resposta inválida do servidor. Tipo de conteúdo: ${contentType}`);
+            throw new Error(`Resposta inválida do servidor. Tipo de conteúdo: ${contentTypeHeader}`);
         }
         
         const data = await response.json();
 
-        const results = data.recommendations || data.movies;
+        const results = data.recommendations || data.movies || data.tv_shows;
 
         if (response.ok && Array.isArray(results)) {
-            const newMovies = results.map(m => m.movie ? m.movie : m);
+            const newContent = results.map(item => item.movie || item.tv_show || item);
             
-            const count = data.total_count || newMovies.length;
+            const count = data.total_count || newContent.length;
             setTotalCount(count);
             setTotalPages(Math.ceil(count / MOVIES_PER_PAGE) || 1);
             
-            return newMovies;
+            return newContent;
         } else {
             return [];
         }
@@ -95,7 +96,7 @@ const RecommendationPage = () => {
                 navigate('/login');
                 setError("Sessão expirada. Faça login novamente.");
             } else {
-                setError("Falha ao carregar filmes. " + err.message);
+                setError("Falha ao carregar conteúdo. " + err.message);
             }
         } finally {
             setLoading(false);
@@ -110,23 +111,26 @@ const RecommendationPage = () => {
             const token = getToken();
             let endpoint = "";
             let fetcher = fetch;
-            let title = "Recomendações";
+            const isMovie = contentTypeFromUrl === 'movie';
+            let title = `Recomendações de ${isMovie ? 'Filmes' : 'Séries'}`;
             let isPersonalizedAttempt = false;
+            
+            const contentPrefix = isMovie ? '' : `/${contentTypeFromUrl}`;
             
             let genreParam = genreId ? `?genre_id=${genreId}` : '';
             
             if (genreId) {
-                endpoint = `/recommendations/genre${genreParam}`; 
-                title = "Recomendações por Gênero Selecionado";
+                endpoint = `/recommendations${contentPrefix}/genre${genreParam}`; 
+                title = `Recomendações de ${isMovie ? 'Filmes' : 'Séries'} por Gênero`;
             } else if (token) {
-                endpoint = "/recommendations"; 
+                endpoint = `/recommendations${contentPrefix}`; 
                 fetcher = fetchWithAuth;
-                title = "Suas Recomendações Personalizadas";
+                title = `Suas Recomendações Personalizadas de ${isMovie ? 'Filmes' : 'Séries'}`;
                 isPersonalizedAttempt = true;
             } else {
-                endpoint = "/movies/catalog"; 
+                endpoint = `/recommendations${contentPrefix}/popular`; 
                 fetcher = fetch;
-                title = "Catálogo Completo (A-Z)";
+                title = `${isMovie ? 'Filmes' : 'Séries'} Populares`;
             }
             
             setPageTitle(title);
@@ -149,15 +153,15 @@ const RecommendationPage = () => {
             } catch (err) {
                 if (isPersonalizedAttempt && (err.message.includes("422") || err.message.includes("422_FALLBACK_NEEDED"))) {
                     
-                    const friendlyMessage = "Você precisa avaliar mais filmes para receber sugestões personalizadas. Exibindo filmes populares para começar.";
+                    const friendlyMessage = `Você precisa avaliar mais ${isMovie ? 'filmes' : 'séries'} para receber sugestões personalizadas. Exibindo populares para começar.`;
                     setError(friendlyMessage);
                     
-                    setCurrentEndpoint(`/recommendations/popular`);
+                    setCurrentEndpoint(`/recommendations${contentPrefix}/popular`);
                     setCurrentFetcher(() => fetch);
-                    setPageTitle("Filmes Populares para Avaliação");
+                    setPageTitle(`${isMovie ? 'Filmes' : 'Séries'} Populares para Avaliação`);
                     
                     try {
-                        const fallbackMovies = await executeFetch(`/recommendations/popular`, fetch, pageFromUrl);
+                        const fallbackMovies = await executeFetch(`/recommendations${contentPrefix}/popular`, fetch, pageFromUrl);
                         if (fallbackMovies.length > 0) {
                             setMovies(fallbackMovies);
                         } else {
@@ -165,7 +169,7 @@ const RecommendationPage = () => {
                         }
                     } catch (fallbackError) {
                         console.error("Erro no fallback:", fallbackError);
-                        setError("Falha ao carregar lista de filmes genérica. " + fallbackError.message);
+                        setError("Falha ao carregar lista de conteúdo genérica. " + fallbackError.message);
                     }
                     
                 } else {
@@ -177,7 +181,7 @@ const RecommendationPage = () => {
         };
 
         loadInitialConfig();
-    }, [navigate, genreId, location.search, executeFetch]);
+    }, [navigate, genreId, location.search, executeFetch, contentTypeFromUrl]);
     
     useEffect(() => {
         if (currentEndpoint) {
@@ -186,7 +190,7 @@ const RecommendationPage = () => {
     }, [pageFromUrl, currentEndpoint, loadMovies]);
 
     const handlePageChange = (event, value) => {
-        let newSearch = `?page=${value}`;
+        let newSearch = `?page=${value}&type=${contentTypeFromUrl}`;
         
         if (genreId) {
             newSearch += `&genre=${genreId}`;
@@ -197,12 +201,12 @@ const RecommendationPage = () => {
     
     const handleAddToWishlist = async (tmdbId) => {
         if (!getToken()) {
-            setSnackbarMessage("Faça login para adicionar filmes à sua Wishlist.");
+            setSnackbarMessage("Faça login para adicionar conteúdo à sua Wishlist.");
             setSnackbarOpen(true);
             return;
         }
         try {
-            const response = await fetchWithAuth(`user/watchlist/add/${tmdbId}`, {
+            const response = await fetchWithAuth(`user/watchlist/add/${tmdbId}?type=${contentTypeFromUrl}`, {
                 method: 'POST',
             });
 
@@ -268,6 +272,29 @@ const RecommendationPage = () => {
                 </div>
             )}
             
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
+                <Button
+                    variant={contentTypeFromUrl === 'movie' ? 'contained' : 'outlined'}
+                    onClick={() => {
+                        const newParams = new URLSearchParams(location.search);
+                        newParams.set('type', 'movie');
+                        navigate(location.pathname + '?' + newParams.toString());
+                    }}
+                >
+                    Ver Filmes
+                </Button>
+                <Button
+                    variant={contentTypeFromUrl === 'tv' ? 'contained' : 'outlined'}
+                    onClick={() => {
+                        const newParams = new URLSearchParams(location.search);
+                        newParams.set('type', 'tv');
+                        navigate(location.pathname + '?' + newParams.toString());
+                    }}
+                >
+                    Ver Séries
+                </Button>
+            </Box>
+            
             <h2 style={{ marginBottom: '20px' }}>Resultados ({totalCount} itens)</h2>
             <div className="card-grid" id="recommendationsList">
                 {movies.map((movie) => {
@@ -277,7 +304,7 @@ const RecommendationPage = () => {
                         <div className="movie-card" key={movie.tmdb_id}>
                             <img 
                                 src={`${TMDB_IMAGE_BASE_URL}${movie.poster_path}`} 
-                                alt={`Poster do filme ${movie.title}`} 
+                                alt={`Poster do conteúdo ${movie.title}`} 
                                 className="movie-poster"
                             />
                             <h3>{movie.title}</h3>
@@ -288,6 +315,7 @@ const RecommendationPage = () => {
                                     <StarRating 
                                         tmdbId={movie.tmdb_id} 
                                         initialRating={movie.user_rating || 0} 
+                                        contentType={contentTypeFromUrl}
                                     />
                                 )}
                                 <Button 
