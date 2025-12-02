@@ -1,3 +1,4 @@
 venv
 .env
 localhost+1-key.pem
+cinematch_dump.sql
