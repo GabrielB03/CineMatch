@@ -28,7 +28,9 @@ def create_app():
             "http://localhost:5173",
             "http://127.0.0.1:5173",
             "https://localhost:5173",
-            "https://127.0.0.1:5173"
+            "https://127.0.0.1:5173",
+            "https://cinematch-api-mhxk.onrender.com",
+            "https://cinematch-gabrielb03.vercel.app"
         ]}}, supports_credentials=True)
 
     app.register_blueprint(rating_bp, url_prefix='/api/ratings')
@@ -69,6 +71,7 @@ if __name__ == '__main__':
             debug=FLASK_DEBUG,
             ssl_context=(CERT_FILE, KEY_FILE)
         )
+        
     else:
         app.run(
             host="0.0.0.0",
