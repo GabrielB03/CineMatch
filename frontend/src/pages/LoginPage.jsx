@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Box, Paper, Typography, Alert } from '@mui/material';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 
-const API_BASE_URL = "https://localhost:5000/api";
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -23,7 +23,7 @@ const LoginPage = () => {
         }
 
         try {
-            const res = await fetch(`${API_BASE_URL}/auth/login`, {
+            const res = await fetch(`${API_URL}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),

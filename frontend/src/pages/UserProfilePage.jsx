@@ -5,7 +5,7 @@ import { Container, Typography, Grid, Card, CardContent, CardMedia, Rating, Box,
 import axios from 'axios';
 import { getToken } from '../utils/authApi';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const UserProfilePage = () => {

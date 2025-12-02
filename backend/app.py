@@ -30,7 +30,7 @@ def create_app():
             "https://localhost:5173",
             "https://127.0.0.1:5173",
             "https://cinematch-api-mhxk.onrender.com",
-            "https://cinematch-gabrielb03.vercel.app"
+            "https://cinematch-navy-seven.vercel.app"
         ]}}, supports_credentials=True)
 
     app.register_blueprint(rating_bp, url_prefix='/api/ratings')

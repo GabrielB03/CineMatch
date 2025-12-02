@@ -6,7 +6,7 @@ import { fetchWithAuth, removeToken } from '../utils/authApi';
 import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const API_URL = 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const MyRatingsPage = () => {

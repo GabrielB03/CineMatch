@@ -6,7 +6,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import axios from 'axios';
 import { getToken } from '../utils/authApi';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
 
 const UserListPage = () => {
     const [users, setUsers] = useState([]);

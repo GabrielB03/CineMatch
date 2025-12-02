@@ -7,7 +7,7 @@ import { FormControl, InputLabel, Select, MenuItem, Button, Box, CircularProgres
 import MovieIcon from '@mui/icons-material/Movie';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-const API_BASE_URL = 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MOVIES_PER_PAGE = 30;
 
@@ -36,7 +36,7 @@ const GenreSelectionPage = () => {
 
         try {
             const endpoint = contentType === 'movie' ? 'movies/catalog' : 'tv_shows/catalog';
-            const res = await fetch(`${API_BASE_URL}/${endpoint}?page=${pageToLoad}&limit=${MOVIES_PER_PAGE}&sort=alphabetical`);
+            const res = await fetch(`${API_URL}/${endpoint}?page=${pageToLoad}&limit=${MOVIES_PER_PAGE}&sort=alphabetical`);
 
             if (!res.ok) {
                 throw new Error(`Erro ${res.status}: Não foi possível carregar o catálogo de ${contentType === 'movie' ? 'filmes' : 'séries'}.`);
@@ -67,7 +67,7 @@ const GenreSelectionPage = () => {
         if (!showMovieCatalog) {
             const fetchGenres = async () => {
                 try {
-                    const res = await fetch(`${API_BASE_URL}/genres`);
+                    const res = await fetch(`${API_URL}/genres`);
 
                     if (!res.ok) {
                         throw new Error(`Erro ${res.status}: Não foi possível carregar os gêneros.`);

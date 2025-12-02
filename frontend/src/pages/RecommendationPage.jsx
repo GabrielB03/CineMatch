@@ -7,7 +7,7 @@ import { CircularProgress, Button, Box, Pagination, Snackbar, Alert } from '@mui
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
-const API_BASE_URL = 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
 const MOVIES_PER_PAGE = 30;
 
 const RecommendationPage = () => {
@@ -40,7 +40,7 @@ const RecommendationPage = () => {
         if (isAuthCall) {
             response = await fetcher(finalEndpoint);
         } else {
-            response = await fetch(API_BASE_URL + finalEndpoint, {
+            response = await fetch(API_URL + finalEndpoint, {
                 headers: { "Content-Type": "application/json" },
                 credentials: 'include',
             });
