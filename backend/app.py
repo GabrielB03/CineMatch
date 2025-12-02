@@ -44,8 +44,8 @@ def create_app():
     app.register_blueprint(stats_bp, url_prefix='/api/stats')
     app.register_blueprint(debug_bp, url_prefix='/api/debug')
 
-    with app.app_context():
-        db.create_all()
+#    with app.app_context():
+#        db.create_all()
 
     @app.route("/")
     def serve_index():
