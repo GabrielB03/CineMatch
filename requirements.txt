@@ -15,6 +15,7 @@ Flask-JWT-Extended==4.7.1
 Flask-SQLAlchemy==3.1.1
 googletrans==4.0.2
 greenlet==3.2.4
+gunicorn==23.0.0
 h11==0.16.0
 h2==4.3.0
 hpack==4.1.0
@@ -29,6 +30,7 @@ joblib==1.5.2
 MarkupSafe==3.0.2
 numpy==2.3.2
 openpyxl==3.1.5
+packaging==25.0
 pandas==2.3.2
 psycopg2==2.9.10
 pycparser==2.22
