@@ -1,7 +1,5 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.exc import IntegrityError
-from extensions import db
 from models.movie import Movie
 from models.rating import Rating
 from services.tmdb_service import get_movie_details, search_movies_tmdb, get_popular_movies, get_movies_by_genre
@@ -43,11 +41,8 @@ def get_all_movies_catalog():
 
         offset = (page - 1) * limit
 
-        query = Movie.query.order_by(
-            Movie.title.asc()).limit(limit).offset(offset)
-        movies = query.all()
-
-        total_count = db.session.query(Movie).count()
+        movies = []
+        total_count = 0
 
         formatted_movies = []
         for movie in movies:
@@ -67,15 +62,13 @@ def get_all_movies_catalog():
 
 @movie_bp.route("/<int:tmdb_id>/details", methods=["GET"])
 def movie_details(tmdb_id):
-    movie = Movie.query.filter_by(tmdb_id=tmdb_id).first()
+    movie = None
 
     if not movie:
         movie_data = get_movie_details(tmdb_id)
         if not movie_data:
             return jsonify({"error": "Filme não encontrado"}), 404
         movie = Movie(**movie_data)
-        db.session.add(movie)
-        db.session.commit()
 
     return jsonify(
         {
@@ -113,17 +106,15 @@ def rate_movie(tmdb_id):
         return jsonify({"error": "Usuário não autenticado"}), 401
 
     try:
-        movie = Movie.query.filter_by(tmdb_id=tmdb_id).first()
+        movie = None
         if not movie:
             movie_data = get_movie_details(tmdb_id)
             if not movie_data:
                 return jsonify({"error": "Filme não encontrado."}), 404
 
             movie = Movie(**movie_data)
-            db.session.add(movie)
 
-        existing_rating = Rating.query.filter_by(
-            user_id=user_id, tmdb_id=tmdb_id).first()
+        existing_rating = None
         if existing_rating:
             existing_rating.rating = rating
         else:
@@ -133,13 +124,9 @@ def rate_movie(tmdb_id):
                 tmdb_id=tmdb_id,
                 rating=rating
             )
-            db.session.add(new_rating)
-
-        db.session.commit()
 
         return jsonify({"message": "✔ Avaliação salva com sucesso!"}), 200
 
     except Exception as e:
-        db.session.rollback()
         print(f"❌ Erro de DB/Processamento na avaliação: {e}")
         return jsonify({"error": f"Falha ao salvar a avaliação: {e}"}), 422

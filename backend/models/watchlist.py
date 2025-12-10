@@ -1,24 +1,15 @@
 from datetime import datetime
-from extensions import db
 
-class Watchlist(db.Model):
+class Watchlist:
     __tablename__ = "watchlist"
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    movie_id = db.Column(db.Integer, db.ForeignKey("movie.id"), nullable=True)
-    tv_show_id = db.Column(
-        db.Integer, db.ForeignKey("tv_show.id"), nullable=True)
-    added_at = db.Column(db.DateTime, default=datetime.utcnow)
-    notes = db.Column(db.Text)
-    priority = db.Column(db.Integer, default=1)
-
-    __table_args__ = (
-        db.UniqueConstraint("user_id", "movie_id",
-                            name="_user_movie_watchlist_uc"),
-        db.UniqueConstraint("user_id", "tv_show_id",
-                            name="_user_tv_show_watchlist_uc"),
-    )
+    id = None
+    user_id = None
+    movie_id = None
+    tv_show_id = None
+    added_at = None
+    notes = None
+    priority = None
 
     def __init__(self, user_id: int, movie_id: int = None, tv_show_id: int = None, notes: str = None, priority: int = 1):
         self.user_id = user_id

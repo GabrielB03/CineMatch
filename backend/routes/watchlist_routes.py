@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from extensions import db
 from models.movie import Movie
 from models.tv_show import TVShow
 from models.watchlist import Watchlist
@@ -20,16 +19,14 @@ def get_content_and_id_field(content_type, tmdb_id):
         id_field = 'tv_show_id'
     else:
         raise ValueError("Tipo de conteúdo inválido.")
-        
-    content = Model.query.filter_by(tmdb_id=tmdb_id).first()
+
+    content = None
     if not content:
         content_data = detail_func(tmdb_id)
         if not content_data:
             return None, None, None
         content = Model(**content_data)
-        db.session.add(content)
-        db.session.commit()
-        
+
     return content, id_field, Model
 
 @watchlist_bp.route("", methods=["GET"])
@@ -41,18 +38,10 @@ def get_watchlist():
     offset = (page - 1) * limit
 
     try:
-        movie_query = db.session.query(Watchlist, Movie).join(Movie, Watchlist.movie_id == Movie.id).filter(
-            Watchlist.user_id == user_id, Watchlist.movie_id.isnot(None)
-        )
-        tv_query = db.session.query(Watchlist, TVShow).join(TVShow, Watchlist.tv_show_id == TVShow.id).filter(
-            Watchlist.user_id == user_id, Watchlist.tv_show_id.isnot(None)
-        )
-        
-        all_items = movie_query.all() + tv_query.all()
-        all_items.sort(key=lambda x: x[0].added_at, reverse=True)
-        
+        all_items = []
+
         total_count = len(all_items)
-        
+
         items = all_items[offset:offset + limit]
 
         result = []
@@ -84,25 +73,21 @@ def add_to_watchlist(tmdb_id):
     content_type = request.args.get("type", "movie")
 
     try:
-        content_obj, id_field, _ = get_content_and_id_field(content_type, tmdb_id)
+        content_obj, id_field, _ = get_content_and_id_field(
+            content_type, tmdb_id)
 
-        existing_item = Watchlist.query.filter_by(
-            user_id=user_id, **{id_field: content_obj.id}
-        ).first()
-        
+        existing_item = None
+
         if existing_item:
             return jsonify({"message": f"{content_type.capitalize()} já está na sua Wishlist."}), 200
 
         new_item = Watchlist(user_id=user_id, **{id_field: content_obj.id})
-        db.session.add(new_item)
-        db.session.commit()
 
         return jsonify({"message": f"{content_type.capitalize()} adicionado à Wishlist com sucesso!"}), 201
 
     except ValueError:
         return jsonify({"message": "Tipo de conteúdo inválido."}), 400
     except Exception as e:
-        db.session.rollback()
         print(f"❌ Erro ao processar POST Wishlist: {e}")
         return jsonify({"message": "Erro interno do servidor ao adicionar conteúdo"}), 500
 
@@ -113,23 +98,18 @@ def remove_from_watchlist(tmdb_id):
     content_type = request.args.get("type", "movie")
 
     try:
-        content_obj, id_field, Model = get_content_and_id_field(content_type, tmdb_id)
+        content_obj, id_field, Model = get_content_and_id_field(
+            content_type, tmdb_id)
 
-        item = Watchlist.query.filter_by(
-            user_id=user_id, **{id_field: content_obj.id}
-        ).first()
-        
+        item = None
+
         if not item:
             return jsonify({"message": "Item não encontrado na sua Wishlist."}), 404
-
-        db.session.delete(item)
-        db.session.commit()
 
         return jsonify({"message": f"{content_type.capitalize()} removido da Wishlist com sucesso!"}), 200
 
     except ValueError:
         return jsonify({"message": "Tipo de conteúdo inválido."}), 400
     except Exception as e:
-        db.session.rollback()
         print(f"❌ Erro ao processar DELETE Wishlist: {e}")
         return jsonify({"message": "Erro interno do servidor ao remover item"}), 500
