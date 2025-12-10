@@ -8,7 +8,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
-from extensions import db
 from models.movie import Movie
 from models.tv_show import TVShow
 from models.rating import Rating
@@ -58,11 +57,7 @@ class RecommendationEngine:
         try:
             MIN_RATINGS = Config.MINIMUM_RATINGS_FOR_PERSONALIZED
 
-            positive_ratings_count = (
-                db.session.query(Rating)
-                .filter(Rating.user_id == user_id, Rating.rating >= 6.0, Rating.movie_id.isnot(None))
-                .count()
-            )
+            positive_ratings_count = 0
 
             if positive_ratings_count < MIN_RATINGS:
                 raise NotEnoughRatingsError(
@@ -71,16 +66,11 @@ class RecommendationEngine:
                     message="Content-based requer um mínimo de avaliações positivas."
                 )
 
-            user_ratings = (
-                db.session.query(Rating, Movie)
-                .join(Movie)
-                .filter(Rating.user_id == user_id, Rating.rating >= 6.0, Rating.movie_id.isnot(None))
-                .all()
-            )
+            user_ratings = []
             if not user_ratings:
                 return []
 
-            all_movies = Movie.query.all()
+            all_movies = []
             if len(all_movies) < 2:
                 return []
 
@@ -125,7 +115,7 @@ class RecommendationEngine:
 
             recommendations = []
             for movie_id, score in movie_similarities[:top_n]:
-                movie = Movie.query.get(movie_id)
+                movie = Movie()
                 if movie:
                     recommendations.append({
                         "movie": movie,
@@ -144,11 +134,7 @@ class RecommendationEngine:
         try:
             MIN_RATINGS = Config.MINIMUM_RATINGS_FOR_PERSONALIZED
 
-            positive_ratings_count = (
-                db.session.query(Rating)
-                .filter(Rating.user_id == user_id, Rating.rating >= 6.0, Rating.tv_show_id.isnot(None))
-                .count()
-            )
+            positive_ratings_count = 0
 
             if positive_ratings_count < MIN_RATINGS:
                 raise NotEnoughRatingsError(
@@ -157,16 +143,11 @@ class RecommendationEngine:
                     message="Content-based requer um mínimo de avaliações positivas para séries."
                 )
 
-            user_ratings = (
-                db.session.query(Rating, TVShow)
-                .join(TVShow, Rating.tv_show_id == TVShow.id)
-                .filter(Rating.user_id == user_id, Rating.rating >= 6.0, Rating.tv_show_id.isnot(None))
-                .all()
-            )
+            user_ratings = []
             if not user_ratings:
                 return []
 
-            all_tv_shows = TVShow.query.all()
+            all_tv_shows = []
             if len(all_tv_shows) < 2:
                 return []
 
@@ -212,7 +193,7 @@ class RecommendationEngine:
 
             recommendations = []
             for tv_show_id, score in tv_show_similarities[:top_n]:
-                tv_show = TVShow.query.get(tv_show_id)
+                tv_show = TVShow()
                 if tv_show:
                     recommendations.append({
                         "tv_show": tv_show,
@@ -230,8 +211,7 @@ class RecommendationEngine:
 
     def collaborative_filtering_recommendations(self, user_id, top_n=10):
         try:
-            ratings_data = db.session.query(
-                Rating.user_id, Rating.movie_id, Rating.rating).filter(Rating.movie_id.isnot(None)).all()
+            ratings_data = []
             if len(ratings_data) < 10:
                 return []
 
@@ -275,7 +255,7 @@ class RecommendationEngine:
                 predicted_rating = user_predictions[movie_idx]
 
                 if predicted_rating > 6.0:
-                    movie = Movie.query.get(movie_id)
+                    movie = Movie()
                     if movie:
                         recommendations.append({
                             "movie": movie,
@@ -291,8 +271,7 @@ class RecommendationEngine:
 
     def collaborative_filtering_tv_recommendations(self, user_id, top_n=10):
         try:
-            ratings_data = db.session.query(
-                Rating.user_id, Rating.tv_show_id, Rating.rating).filter(Rating.tv_show_id.isnot(None)).all()
+            ratings_data = []
             if len(ratings_data) < 10:
                 return []
 
@@ -336,7 +315,7 @@ class RecommendationEngine:
                 predicted_rating = user_predictions[tv_show_idx]
 
                 if predicted_rating > 6.0:
-                    tv_show = TVShow.query.get(tv_show_id)
+                    tv_show = TVShow()
                     if tv_show:
                         recommendations.append({
                             "tv_show": tv_show,
@@ -432,16 +411,11 @@ class RecommendationEngine:
 
     def get_popular_movies(self, top_n=10, offset=0):
         try:
-            query = Movie.query.order_by(Movie.popularity.desc())
+            query = None
 
-            total_count = query.count()
+            total_count = 0
 
-            movies = (
-                query
-                .limit(top_n)
-                .offset(offset)
-                .all()
-            )
+            movies = []
             random.shuffle(movies)
 
             return self._load_movie_details(movies, total_count)
@@ -452,16 +426,11 @@ class RecommendationEngine:
 
     def get_popular_tv_shows(self, top_n=10, offset=0):
         try:
-            query = TVShow.query.order_by(TVShow.vote_count.desc())
+            query = None
 
-            total_count = query.count()
+            total_count = 0
 
-            tv_shows = (
-                query
-                .limit(top_n)
-                .offset(offset)
-                .all()
-            )
+            tv_shows = []
             random.shuffle(tv_shows)
 
             return self._load_tv_show_details(tv_shows, total_count)
@@ -477,17 +446,11 @@ class RecommendationEngine:
             if not genre_name:
                 return {"movies": [], "total_count": 0}
 
-            query = Movie.query.filter(Movie.genres.ilike(f"%{genre_name}%"))
+            query = None
 
-            total_count = query.count()
+            total_count = 0
 
-            movies = (
-                query
-                .order_by(Movie.release_date.desc())
-                .limit(top_n)
-                .offset(offset)
-                .all()
-            )
+            movies = []
             random.shuffle(movies)
 
             return self._load_movie_details(movies, total_count)
@@ -503,17 +466,11 @@ class RecommendationEngine:
             if not genre_name:
                 return {"tv_shows": [], "total_count": 0}
 
-            query = TVShow.query.filter(TVShow.genres.ilike(f"%{genre_name}%"))
+            query = None
 
-            total_count = query.count()
+            total_count = 0
 
-            tv_shows = (
-                query
-                .order_by(TVShow.first_air_date.desc())
-                .limit(top_n)
-                .offset(offset)
-                .all()
-            )
+            tv_shows = []
             random.shuffle(tv_shows)
 
             return self._load_tv_show_details(tv_shows, total_count)
