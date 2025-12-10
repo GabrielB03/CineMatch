@@ -158,6 +158,16 @@ const MyRatingsPage = () => {
     );
     
     const contentTitle = tabValue === 0 ? "Filmes Avaliados" : "Séries Avaliadas";
+    
+    const getImagePath = (posterPath) => {
+        if (!posterPath) {
+            return '/placeholder.png';
+        }
+        if (posterPath.startsWith('http')) {
+            return posterPath;
+        }
+        return `${TMDB_IMAGE_BASE_URL}${posterPath}`;
+    };
 
     if (loading) {
         return <Layout headerTitle="Minhas Avaliações"><Box display="flex" justifyContent="center" mt={4}><CircularProgress /></Box></Layout>;
@@ -196,7 +206,7 @@ const MyRatingsPage = () => {
                                         <CardMedia
                                             component="img"
                                             sx={{ width: 100, flexShrink: 0 }}
-                                            image={content.poster_path || 'placeholder.png'}
+                                            image={getImagePath(content.poster_path)}
                                             alt={content.title}
                                         />
                                         <CardContent sx={{ flexGrow: 1 }}>

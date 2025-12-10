@@ -4,7 +4,6 @@ from services.recommendation_engine import RecommendationEngine, NotEnoughRating
 from config import Config
 from utils.constants import GENRE_ID_TO_NAME
 from models.tv_show import TVShow
-from services.tmdb_service import get_popular_tv_shows, get_tv_shows_by_genre
 from models.movie import Movie
 
 rec_bp = Blueprint("recommendations", __name__, url_prefix="/recommendations")
@@ -147,7 +146,7 @@ def popular_movies():
 
     try:
         result = engine.get_popular_movies(
-            top_n=limit, offset=offset, include_count=True)
+            top_n=limit, offset=offset)
         movies = result["movies"]
         total_count = result["total_count"]
 
@@ -202,7 +201,7 @@ def get_recommendations_by_genre():
 
     try:
         result = engine.get_movies_by_genre(
-            genre_id, top_n=limit, offset=offset, include_count=True)
+            genre_id, top_n=limit, offset=offset)
 
         movies = result["movies"]
         total_count = result["total_count"]
@@ -234,7 +233,7 @@ def get_tv_recommendations_by_genre():
 
     try:
         result = engine.get_tv_shows_by_genre(
-            genre_id, top_n=limit, offset=offset, include_count=True)
+            genre_id, top_n=limit, offset=offset)
 
         tv_shows = result["tv_shows"]
         total_count = result["total_count"]

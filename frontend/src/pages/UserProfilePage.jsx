@@ -48,6 +48,16 @@ const UserProfilePage = () => {
     }, [userId]);
 
     const username = profile ? profile.username : 'Usuário Desconhecido';
+    
+    const getImagePath = (posterPath) => {
+        if (!posterPath) {
+            return '/placeholder.png';
+        }
+        if (posterPath.startsWith('http')) {
+            return posterPath;
+        }
+        return `${TMDB_IMAGE_BASE_URL}${posterPath}`;
+    };
 
     if (loading) {
         return <Layout headerTitle="Perfil de Usuário"><CircularProgress sx={{ display: 'block', margin: '40px auto' }} /></Layout>;
@@ -61,31 +71,35 @@ const UserProfilePage = () => {
         <Layout headerTitle={`Perfil: ${username}`}>
             <Container maxWidth="lg">
                 <Typography variant="h4" gutterBottom>
-                    Avaliações de {username}
+                    Avaliações de {username} ({ratings.length} itens)
                 </Typography>
 
                 {ratings.length === 0 ? (
-                    <Typography variant="body1">Este usuário ainda não avaliou nenhum filme.</Typography>
+                    <Typography variant="body1">Este usuário ainda não avaliou nenhum filme ou série.</Typography>
                 ) : (
                     <Grid container spacing={4}>
                         {ratings.map((item) => {
-                            const movie = item.movie;
+                            const content = item.content; 
                             const rawRating = item.rating;
                             const convertedRating = rawRating / 2;
                             const currentComment = item.comment;
+                            const contentType = item.content_type;
 
                             return (
-                                <Grid key={item.id} xs={12} sm={6} md={4}>
+                                <Grid item key={item.id} xs={12} sm={6} md={4}>
                                     <Card sx={{ display: 'flex', height: '100%' }}>
                                         <CardMedia
                                             component="img"
                                             sx={{ width: 100, flexShrink: 0 }}
-                                            image={`${TMDB_IMAGE_BASE_URL}${movie.poster_path}` || 'placeholder.png'}
-                                            alt={movie.title}
+                                            image={getImagePath(content.poster_path)}
+                                            alt={content.title}
                                         />
                                         <CardContent sx={{ flexGrow: 1 }}>
+                                            <Typography variant="caption" color="primary.main">
+                                                {contentType === 'movie' ? 'FILME' : 'SÉRIE'}
+                                            </Typography>
                                             <Typography variant="h6" component="div" gutterBottom>
-                                                {movie.title}
+                                                {content.title}
                                             </Typography>
 
                                             <Typography variant="subtitle2" color="text.secondary">

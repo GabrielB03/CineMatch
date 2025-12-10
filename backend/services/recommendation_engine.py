@@ -25,7 +25,8 @@ class RecommendationEngine:
         features = []
 
         if content.genres:
-            features.extend([g.strip().replace(' ', '_') for g in content.genres.split(",")])
+            features.extend([g.strip().replace(' ', '_')
+                            for g in content.genres.split(",")])
 
         if hasattr(content, 'director') and content.director:
             cast_list = content.cast.split(",")[:3]
@@ -40,7 +41,8 @@ class RecommendationEngine:
             keywords = content.keywords.split(",")[:5]
             features.extend([kw.strip().replace(" ", "_") for kw in keywords])
 
-        date_field = getattr(content, 'release_date', getattr(content, 'first_air_date', None))
+        date_field = getattr(content, 'release_date',
+                             getattr(content, 'first_air_date', None))
 
         if date_field:
             try:
@@ -137,7 +139,7 @@ class RecommendationEngine:
                 raise
             print(f"❌ Erro na recomendação baseada em conteúdo: {e}")
             return []
-            
+
     def content_based_tv_recommendations(self, user_id, top_n=10):
         try:
             MIN_RATINGS = Config.MINIMUM_RATINGS_FOR_PERSONALIZED
@@ -199,7 +201,8 @@ class RecommendationEngine:
             similarities = cosine_similarity(
                 np.array([user_profile]), tfidf_matrix)[0]
 
-            rated_tv_show_ids = {rating.tv_show_id for rating, _ in user_ratings}
+            rated_tv_show_ids = {
+                rating.tv_show_id for rating, _ in user_ratings}
             tv_show_similarities = [
                 (tv_show_ids[i], similarities[i])
                 for i in range(len(similarities))
@@ -221,7 +224,8 @@ class RecommendationEngine:
         except Exception as e:
             if isinstance(e, NotEnoughRatingsError):
                 raise
-            print(f"❌ Erro na recomendação baseada em conteúdo para séries: {e}")
+            print(
+                f"❌ Erro na recomendação baseada em conteúdo para séries: {e}")
             return []
 
     def collaborative_filtering_recommendations(self, user_id, top_n=10):
@@ -466,8 +470,7 @@ class RecommendationEngine:
             print(f"❌ Erro ao buscar séries populares {e}")
             return {"tv_shows": [], "total_count": 0}
 
-
-    def get_movies_by_genre(self, genre_id, top_n=10, offset=0, include_count=False):
+    def get_movies_by_genre(self, genre_id, top_n=10, offset=0):
         try:
             genre_name = GENRE_ID_TO_NAME.get(genre_id)
 
@@ -493,7 +496,7 @@ class RecommendationEngine:
             print(f"❌ Erro ao buscar filmes por gênero {genre_id}: {e}")
             return {"movies": [], "total_count": 0}
 
-    def get_tv_shows_by_genre(self, genre_id, top_n=10, offset=0, include_count=False):
+    def get_tv_shows_by_genre(self, genre_id, top_n=10, offset=0):
         try:
             genre_name = GENRE_ID_TO_NAME.get(genre_id)
 
@@ -525,7 +528,7 @@ class RecommendationEngine:
             movie.watch_providers = getattr(movie, 'watch_providers', None)
 
         return {"movies": movies, "total_count": total_count}
-        
+
     def _load_tv_show_details(self, tv_shows, total_count):
         for tv_show in tv_shows:
             tv_show.user_rating = 0

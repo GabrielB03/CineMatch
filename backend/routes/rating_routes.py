@@ -7,6 +7,7 @@ from models.rating import Rating
 from services.tmdb_service import get_movie_details, get_tv_show_details
 from datetime import datetime
 from config import Config
+from sqlalchemy.exc import IntegrityError
 
 rating_bp = Blueprint("ratings", __name__)
 
@@ -75,8 +76,6 @@ def rate_content(content_type, tmdb_id):
             new_rating = Rating(
                 user_id=user_id,
                 rating=rating_value,
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
             )
             setattr(new_rating, id_field, content_obj.id)
 
@@ -88,6 +87,9 @@ def rate_content(content_type, tmdb_id):
 
     except ValueError:
         return jsonify({"error": "Tipo de conteúdo inválido."}), 400
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "Avaliação já existe para este conteúdo. Use PUT para atualizar."}), 409
     except Exception as e:
         db.session.rollback()
         print(f"Erro ao processar avaliação: {e}")
@@ -205,6 +207,7 @@ def update_rating(rating_id):
         print(f"Erro ao atualizar avaliação: {e}")
         return jsonify({"error": "Erro interno do servidor ao atualizar avaliação"}), 500
 
+
 @rating_bp.route("/movies/<int:tmdb_id>/rate", methods=["POST"])
 @jwt_required()
 def old_rate_movie(tmdb_id):
@@ -222,6 +225,37 @@ def get_user_ratings_by_id(user_id):
 
         result = []
 
+        for r, m in movie_ratings:
+            result.append({
+                "id": r.id,
+                "rating": r.rating,
+                "comment": r.comment,
+                "content_type": "movie",
+                "content": {
+                    "id": m.id,
+                    "tmdb_id": m.tmdb_id,
+                    "title": m.title,
+                    "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{m.poster_path}" if m.poster_path else None,
+                    "overview": m.overview,
+                },
+            })
+
+        for r, t in tv_show_ratings:
+            result.append({
+                "id": r.id,
+                "rating": r.rating,
+                "comment": r.comment,
+                "content_type": "tv",
+                "content": {
+                    "id": t.id,
+                    "tmdb_id": t.tmdb_id,
+                    "title": t.title,
+                    "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{t.poster_path}" if t.poster_path else None,
+                    "overview": t.overview,
+                },
+            })
+
+        result.sort(key=lambda x: x["content"].get("title", ""), reverse=False)
         return jsonify(result), 200
     except Exception as e:
         print(f"Erro ao obter avaliações de outro usuário: {e}")
