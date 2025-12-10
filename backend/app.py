@@ -57,20 +57,8 @@ if __name__ == '__main__':
     FLASK_PORT = int(os.getenv("FLASK_PORT", 5000))
     FLASK_DEBUG = os.getenv("FLASK_DEBUG", "False").lower() == "true"
 
-    CERT_FILE = 'localhost+1.pem'
-    KEY_FILE = 'localhost+1-key.pem'
-
-    if os.path.exists(CERT_FILE) and os.path.exists(KEY_FILE):
-        app.run(
-            host="0.0.0.0",
-            port=FLASK_PORT,
-            debug=FLASK_DEBUG,
-            ssl_context=(CERT_FILE, KEY_FILE)
-        )
-
-    else:
-        app.run(
-            host="0.0.0.0",
-            port=FLASK_PORT,
-            debug=FLASK_DEBUG
-        )
+    app.run(
+        host="0.0.0.0",
+        port=FLASK_PORT,
+        debug=FLASK_DEBUG
+    )
