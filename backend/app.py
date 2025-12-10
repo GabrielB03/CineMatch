@@ -32,16 +32,16 @@ def create_app():
             "https://cinematch-navy-seven.vercel.app"
         ]}}, supports_credentials=True)
 
-    app.register_blueprint(rating_bp, url_prefix='/api/ratings')
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(movie_bp, url_prefix='/api/movies')
-    app.register_blueprint(tv_bp, url_prefix='/api/tv_shows')
-    app.register_blueprint(rec_bp, url_prefix='/api/recommendations')
-    app.register_blueprint(genre_bp, url_prefix='/api/genres')
-    app.register_blueprint(user_bp, url_prefix='/api/users')
-    app.register_blueprint(watchlist_bp, url_prefix='/api/user/watchlist')
-    app.register_blueprint(stats_bp, url_prefix='/api/stats')
-    app.register_blueprint(debug_bp, url_prefix='/api/debug')
+    app.register_blueprint(rating_bp, url_prefix='/ratings')
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(movie_bp, url_prefix='/movies')
+    app.register_blueprint(tv_bp, url_prefix='/tv_shows')
+    app.register_blueprint(rec_bp, url_prefix='/recommendations')
+    app.register_blueprint(genre_bp, url_prefix='/genres')
+    app.register_blueprint(user_bp, url_prefix='/users')
+    app.register_blueprint(watchlist_bp, url_prefix='/user/watchlist')
+    app.register_blueprint(stats_bp, url_prefix='/stats')
+    app.register_blueprint(debug_bp, url_prefix='/debug')
 
     @app.route("/")
     def serve_index():
