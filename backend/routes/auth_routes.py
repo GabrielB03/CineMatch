@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from extensions import bcrypt
+from extensions import bcrypt, jwt
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from models import User
 
@@ -9,12 +9,8 @@ auth_bp = Blueprint("auth", __name__)
 def register():
     try:
         data = request.get_json()
-
-        # Substituindo a lógica de DB para registro temporariamente
         hashed_password = bcrypt.generate_password_hash(
             data["password"]).decode("utf-8")
-
-        # Simulação: assumir que o registro foi bem-sucedido
         return jsonify({"message": "Usuário registrado com sucesso!"}), 201
     except Exception as e:
         print(f"❌ Erro no registro: {e}")
@@ -87,8 +83,6 @@ def update_account():
         current_password = data.get('current_password')
         if not current_password:
             return jsonify({"message": "Senha atual incorreta."}), 401
-
-        # Lógica de atualização removida
 
         new_access_token = create_access_token(identity=str(user_id), additional_claims={
             'username': user.username,
