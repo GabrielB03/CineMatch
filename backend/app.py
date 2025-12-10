@@ -1,7 +1,7 @@
 from flask import Flask, send_from_directory, jsonify
 import os
 from config import Config
-from extensions import db, bcrypt, jwt
+from extensions import bcrypt, jwt
 from flask_cors import CORS
 from routes.rating_routes import rating_bp
 from routes.auth_routes import auth_bp
@@ -19,7 +19,6 @@ def create_app():
                 static_url_path="")
     app.config.from_object(Config)
 
-    db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
 
@@ -43,9 +42,6 @@ def create_app():
     app.register_blueprint(watchlist_bp, url_prefix='/api/user/watchlist')
     app.register_blueprint(stats_bp, url_prefix='/api/stats')
     app.register_blueprint(debug_bp, url_prefix='/api/debug')
-
-    with app.app_context():
-        db.create_all()
 
     @app.route("/")
     def serve_index():
@@ -71,7 +67,7 @@ if __name__ == '__main__':
             debug=FLASK_DEBUG,
             ssl_context=(CERT_FILE, KEY_FILE)
         )
-        
+
     else:
         app.run(
             host="0.0.0.0",
