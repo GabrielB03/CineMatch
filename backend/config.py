@@ -24,7 +24,7 @@ class Config:
     JWT_COOKIE_SECURE = True if os.getenv(
         "FLASK_ENV") == "production" else False
     JWT_COOKIE_SAMESITE = 'None'
-    JWT_COOKIE_CSRF_PROTECT = True
+    JWT_COOKIE_CSRF_PROTECT = False  # ALTERADO: Desativado para a apresentação
 
     JWT_ACCESS_CSRF_COOKIE_HTTPONLY = False
     JWT_ACCESS_CSRF_COOKIE_SECURE = True if os.getenv(
