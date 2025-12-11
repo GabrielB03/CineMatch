@@ -7,7 +7,7 @@ import { FormControl, InputLabel, Select, MenuItem, Button, Box, CircularProgres
 import MovieIcon from '@mui/icons-material/Movie';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://cinematch-api-mhxk.onrender.com';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const MOVIES_PER_PAGE = 30;
 

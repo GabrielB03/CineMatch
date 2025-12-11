@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Box, Paper, Typography, Alert } from '@mui/material';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 
-const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://cinematch-api-mhxk.onrender.com';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');

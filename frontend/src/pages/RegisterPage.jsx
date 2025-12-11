@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import { TextField, Button, Box, Paper, Typography, Alert } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
-const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://localhost:5000/api';
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://cinematch-api-mhxk.onrender.com';
 
 const RegisterPage = () => {
     const [username, setUsername] = useState('');

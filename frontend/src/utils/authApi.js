@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://localhost:5000/api";
+const API_BASE_URL = "https://cinematch-api-mhxk.onrender.com";
 
 export const removeToken = () => {
   fetch(`${API_BASE_URL}/auth/logout`, {
