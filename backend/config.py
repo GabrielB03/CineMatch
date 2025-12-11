@@ -23,17 +23,18 @@ class Config:
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_SECURE = True if os.getenv(
         "FLASK_ENV") == "production" else False
-    JWT_COOKIE_SAMESITE = 'Lax'
+    JWT_COOKIE_SAMESITE = 'None'
     JWT_COOKIE_CSRF_PROTECT = True
+
     JWT_ACCESS_CSRF_COOKIE_HTTPONLY = False
     JWT_ACCESS_CSRF_COOKIE_SECURE = True if os.getenv(
         "FLASK_ENV") == "production" else False
-    JWT_ACCESS_CSRF_COOKIE_SAMESITE = 'Lax'
+    JWT_ACCESS_CSRF_COOKIE_SAMESITE = 'None'
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
 
     TMDB_API_KEY = os.getenv('TMDB_API_KEY', 'SUA_CHAVE_TMDB')
     TMDB_BASE_URL = "https://api.themoviedb.org/3"
-    TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
+    TMDB_IMAGE_BASE_URL = "https://image.themoviedb.org/t/p/w500"
 
     FRONTEND_PATH = os.path.abspath(os.path.join(
         os.path.dirname(__file__), '..', 'frontend', 'dist'))

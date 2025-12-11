@@ -126,7 +126,7 @@ def rate_movie(tmdb_id):
 
             movie = Movie(**movie_data)
             db.session.add(movie)
-            db.session.commit()
+            # db.session.commit()
 
         existing_rating = Rating.query.filter_by(
             user_id=user_id, movie_id=movie.id).first()
