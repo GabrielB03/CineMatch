@@ -1,4 +1,3 @@
-# Mapeamento de ID de Gênero para o Nome (em Português, conforme seu DB)
 GENRE_ID_TO_NAME = {
     28: "Ação",
     12: "Aventura",
@@ -21,14 +20,7 @@ GENRE_ID_TO_NAME = {
     37: "Faroeste"
 }
 
-# Definição da Exceção (pode ser movida para cá para quebrar a dependência)
-
-
 class NotEnoughRatingsError(Exception):
-    """
-    Exceção levantada quando o usuário não tem avaliações suficientes.
-    """
-
     def __init__(self, required_count: int, current_count: int, message: str = "Avaliações insuficientes."):
         self.required_count = required_count
         self.current_count = current_count

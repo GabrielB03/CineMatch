@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from extensions import bcrypt, jwt
+from extensions import db, bcrypt, jwt
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from models import User
 
@@ -9,8 +9,21 @@ auth_bp = Blueprint("auth", __name__)
 def register():
     try:
         data = request.get_json()
+
+        if User.query.filter_by(email=data["email"]).first():
+            return jsonify({"message": "Email já cadastrado"}), 400
+
+        if User.query.filter_by(username=data["username"]).first():
+            return jsonify({"message": "Nome de usuário já existe"}), 400
+
         hashed_password = bcrypt.generate_password_hash(
             data["password"]).decode("utf-8")
+        new_user = User(
+            username=data["username"], email=data["email"], password_hash=hashed_password)
+
+        db.session.add(new_user)
+        db.session.commit()
+
         return jsonify({"message": "Usuário registrado com sucesso!"}), 201
     except Exception as e:
         print(f"❌ Erro no registro: {e}")
@@ -20,7 +33,7 @@ def register():
 def login():
     try:
         data = request.get_json()
-        user = None
+        user = User.query.filter_by(email=data["email"]).first()
 
         if user and bcrypt.check_password_hash(user.password_hash, data["password"]):
             access_token = create_access_token(identity=str(user.id), additional_claims={
@@ -54,7 +67,7 @@ def logout():
 def user_profile():
     try:
         user_id = get_jwt_identity()
-        user = None
+        user = User.query.get(user_id)
 
         if user:
             return jsonify({
@@ -73,7 +86,7 @@ def user_profile():
 def update_account():
     try:
         user_id = get_jwt_identity()
-        user = None
+        user = User.query.get(user_id)
 
         if not user:
             return jsonify({"message": "Usuário não encontrado."}), 404
@@ -81,8 +94,18 @@ def update_account():
         data = request.get_json()
 
         current_password = data.get('current_password')
-        if not current_password:
+        if not current_password or not bcrypt.check_password_hash(user.password_hash, current_password):
             return jsonify({"message": "Senha atual incorreta."}), 401
+
+        new_password = data.get('new_password')
+        if new_password:
+            user.password_hash = bcrypt.generate_password_hash(
+                new_password).decode("utf-8")
+
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+
+        db.session.commit()
 
         new_access_token = create_access_token(identity=str(user_id), additional_claims={
             'username': user.username,
@@ -102,5 +125,5 @@ def update_account():
 @jwt_required()
 def protected():
     user_id = get_jwt_identity()
-    user = None
-    return jsonify({"message": "Acesso autorizado!", "user": {"id": user_id, "username": "teste"}}), 200
+    user = User.query.get(user_id)
+    return jsonify({"message": "Acesso autorizado!", "user": {"id": user_id, "username": user.username}}), 200

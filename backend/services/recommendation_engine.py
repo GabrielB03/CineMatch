@@ -2,10 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
 from models.movie import Movie
@@ -14,9 +10,11 @@ from models.rating import Rating
 from config import Config
 from utils.constants import GENRE_ID_TO_NAME, NotEnoughRatingsError
 import random
+from sqlalchemy import func
 
 class RecommendationEngine:
-    def __init__(self):
+    def __init__(self, db):
+        self.db = db
         self.content_vectorizer = TfidfVectorizer(
             max_features=5000, stop_words="english")
 
@@ -57,7 +55,10 @@ class RecommendationEngine:
         try:
             MIN_RATINGS = Config.MINIMUM_RATINGS_FOR_PERSONALIZED
 
-            positive_ratings_count = 0
+            positive_ratings_count = self.db.session.query(Rating).filter(
+                Rating.user_id == user_id, Rating.rating >= 6, Rating.movie_id.isnot(
+                    None)
+            ).count()
 
             if positive_ratings_count < MIN_RATINGS:
                 raise NotEnoughRatingsError(
@@ -66,11 +67,14 @@ class RecommendationEngine:
                     message="Content-based requer um mínimo de avaliações positivas."
                 )
 
-            user_ratings = []
+            user_ratings = self.db.session.query(Rating, Movie).join(Movie).filter(
+                Rating.user_id == user_id, Rating.rating >= 6
+            ).all()
+
             if not user_ratings:
                 return []
 
-            all_movies = []
+            all_movies = Movie.query.all()
             if len(all_movies) < 2:
                 return []
 
@@ -115,7 +119,7 @@ class RecommendationEngine:
 
             recommendations = []
             for movie_id, score in movie_similarities[:top_n]:
-                movie = Movie()
+                movie = Movie.query.get(movie_id)
                 if movie:
                     recommendations.append({
                         "movie": movie,
@@ -134,7 +138,10 @@ class RecommendationEngine:
         try:
             MIN_RATINGS = Config.MINIMUM_RATINGS_FOR_PERSONALIZED
 
-            positive_ratings_count = 0
+            positive_ratings_count = self.db.session.query(Rating).filter(
+                Rating.user_id == user_id, Rating.rating >= 6, Rating.tv_show_id.isnot(
+                    None)
+            ).count()
 
             if positive_ratings_count < MIN_RATINGS:
                 raise NotEnoughRatingsError(
@@ -143,11 +150,14 @@ class RecommendationEngine:
                     message="Content-based requer um mínimo de avaliações positivas para séries."
                 )
 
-            user_ratings = []
+            user_ratings = self.db.session.query(Rating, TVShow).join(TVShow).filter(
+                Rating.user_id == user_id, Rating.rating >= 6
+            ).all()
+
             if not user_ratings:
                 return []
 
-            all_tv_shows = []
+            all_tv_shows = TVShow.query.all()
             if len(all_tv_shows) < 2:
                 return []
 
@@ -193,7 +203,7 @@ class RecommendationEngine:
 
             recommendations = []
             for tv_show_id, score in tv_show_similarities[:top_n]:
-                tv_show = TVShow()
+                tv_show = TVShow.query.get(tv_show_id)
                 if tv_show:
                     recommendations.append({
                         "tv_show": tv_show,
@@ -211,7 +221,9 @@ class RecommendationEngine:
 
     def collaborative_filtering_recommendations(self, user_id, top_n=10):
         try:
-            ratings_data = []
+            ratings_data = self.db.session.query(Rating.user_id, Rating.movie_id, Rating.rating).filter(
+                Rating.movie_id.isnot(None)
+            ).all()
             if len(ratings_data) < 10:
                 return []
 
@@ -255,7 +267,7 @@ class RecommendationEngine:
                 predicted_rating = user_predictions[movie_idx]
 
                 if predicted_rating > 6.0:
-                    movie = Movie()
+                    movie = Movie.query.get(movie_id)
                     if movie:
                         recommendations.append({
                             "movie": movie,
@@ -271,7 +283,9 @@ class RecommendationEngine:
 
     def collaborative_filtering_tv_recommendations(self, user_id, top_n=10):
         try:
-            ratings_data = []
+            ratings_data = self.db.session.query(Rating.user_id, Rating.tv_show_id, Rating.rating).filter(
+                Rating.tv_show_id.isnot(None)
+            ).all()
             if len(ratings_data) < 10:
                 return []
 
@@ -315,7 +329,7 @@ class RecommendationEngine:
                 predicted_rating = user_predictions[tv_show_idx]
 
                 if predicted_rating > 6.0:
-                    tv_show = TVShow()
+                    tv_show = TVShow.query.get(tv_show_id)
                     if tv_show:
                         recommendations.append({
                             "tv_show": tv_show,
@@ -411,12 +425,12 @@ class RecommendationEngine:
 
     def get_popular_movies(self, top_n=10, offset=0):
         try:
-            query = None
+            query = Movie.query.order_by(
+                Movie.popularity.desc()).offset(offset).limit(top_n)
 
-            total_count = 0
+            total_count = Movie.query.count()
 
-            movies = []
-            random.shuffle(movies)
+            movies = query.all()
 
             return self._load_movie_details(movies, total_count)
 
@@ -426,12 +440,12 @@ class RecommendationEngine:
 
     def get_popular_tv_shows(self, top_n=10, offset=0):
         try:
-            query = None
+            query = TVShow.query.order_by(
+                TVShow.vote_average.desc()).offset(offset).limit(top_n)
 
-            total_count = 0
+            total_count = TVShow.query.count()
 
-            tv_shows = []
-            random.shuffle(tv_shows)
+            tv_shows = query.all()
 
             return self._load_tv_show_details(tv_shows, total_count)
 
@@ -446,12 +460,13 @@ class RecommendationEngine:
             if not genre_name:
                 return {"movies": [], "total_count": 0}
 
-            query = None
+            query = Movie.query.filter(
+                Movie.genres.ilike(f"%{genre_name}%")
+            ).order_by(Movie.popularity.desc())
 
-            total_count = 0
+            total_count = query.count()
 
-            movies = []
-            random.shuffle(movies)
+            movies = query.offset(offset).limit(top_n).all()
 
             return self._load_movie_details(movies, total_count)
 
@@ -466,12 +481,13 @@ class RecommendationEngine:
             if not genre_name:
                 return {"tv_shows": [], "total_count": 0}
 
-            query = None
+            query = TVShow.query.filter(
+                TVShow.genres.ilike(f"%{genre_name}%")
+            ).order_by(TVShow.vote_average.desc())
 
-            total_count = 0
+            total_count = query.count()
 
-            tv_shows = []
-            random.shuffle(tv_shows)
+            tv_shows = query.offset(offset).limit(top_n).all()
 
             return self._load_tv_show_details(tv_shows, total_count)
 
@@ -481,13 +497,17 @@ class RecommendationEngine:
 
     def _load_movie_details(self, movies, total_count):
         for movie in movies:
-            movie.user_rating = 0
+            rating = Rating.query.filter_by(
+                movie_id=movie.id).with_entities(Rating.rating).first()
+            movie.user_rating = rating[0] if rating else 0
             movie.watch_providers = getattr(movie, 'watch_providers', None)
 
         return {"movies": movies, "total_count": total_count}
 
     def _load_tv_show_details(self, tv_shows, total_count):
         for tv_show in tv_shows:
-            tv_show.user_rating = 0
+            rating = Rating.query.filter_by(
+                tv_show_id=tv_show.id).with_entities(Rating.rating).first()
+            tv_show.user_rating = rating[0] if rating else 0
 
         return {"tv_shows": tv_shows, "total_count": total_count}

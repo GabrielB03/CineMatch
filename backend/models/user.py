@@ -1,16 +1,17 @@
+from extensions import db
 from datetime import datetime
 
-class User:
+class User(db.Model):
     __tablename__ = "user"
 
-    id = None
-    username = None
-    email = None
-    password_hash = None
-    created_at = None
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    ratings = None
-    watchlist = None
+    ratings = db.relationship("Rating", backref="user", lazy=True)
+    watchlist = db.relationship("Watchlist", backref="user", lazy=True)
 
     def __repr__(self):
         return f"<User {self.username}>"

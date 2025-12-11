@@ -1,13 +1,14 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.recommendation_engine import RecommendationEngine, NotEnoughRatingsError
+from extensions import db
 from config import Config
 from utils.constants import GENRE_ID_TO_NAME
 from models.tv_show import TVShow
 from models.movie import Movie
 
 rec_bp = Blueprint("recommendations", __name__, url_prefix="/recommendations")
-engine = RecommendationEngine()
+engine = RecommendationEngine(db)
 
 def format_movie(movie):
     return {
@@ -131,6 +132,7 @@ def get_main_tv_recommendations():
     except Exception as e:
         print(f"❌ Erro na recomendação de Séries: {e}")
         return jsonify({"message": f"Erro interno ao gerar recomendações de Séries: {e}"}), 500
+
 
 @rec_bp.route("/popular", methods=["GET"])
 def popular_movies():

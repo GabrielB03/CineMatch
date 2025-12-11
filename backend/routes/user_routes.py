@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
+from extensions import db
 from models.user import User
 
 user_bp = Blueprint('users', __name__, url_prefix='/users')
@@ -8,7 +9,10 @@ user_bp = Blueprint('users', __name__, url_prefix='/users')
 @jwt_required()
 def list_users():
     try:
-        users_list = []
+        users = User.query.all()
+        users_list = [
+            {'id': user.id, 'username': user.username, 'email': user.email} for user in users
+        ]
         return jsonify(users_list), 200
 
     except Exception as e:
@@ -19,7 +23,7 @@ def list_users():
 @jwt_required()
 def get_user_profile(user_id):
     try:
-        user = None
+        user = User.query.get(user_id)
 
         if user is None:
             return jsonify({'message': 'Usuário não encontrado'}), 404

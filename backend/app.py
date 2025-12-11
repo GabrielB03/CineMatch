@@ -1,7 +1,7 @@
 from flask import Flask, send_from_directory, jsonify
 import os
 from config import Config
-from extensions import bcrypt, jwt
+from extensions import db, bcrypt, jwt
 from flask_cors import CORS
 from routes.rating_routes import rating_bp
 from routes.auth_routes import auth_bp
@@ -19,6 +19,7 @@ def create_app():
                 static_url_path="")
     app.config.from_object(Config)
 
+    db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
 

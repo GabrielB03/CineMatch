@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from extensions import db
 from models.movie import Movie
 from models.rating import Rating
 from services.tmdb_service import get_movie_details, search_movies_tmdb, get_popular_movies, get_movies_by_genre
@@ -41,17 +42,26 @@ def get_all_movies_catalog():
 
         offset = (page - 1) * limit
 
-        movies = []
-        total_count = 0
+        if sort == "alphabetical":
+            query = Movie.query.order_by(Movie.title.asc())
+        else:
+            query = Movie.query.order_by(Movie.popularity.desc())
+
+        movies = query.offset(offset).limit(limit).all()
+        total_count = query.count()
 
         formatted_movies = []
         for movie in movies:
+            user_rating = Rating.query.filter_by(
+                movie_id=movie.id).with_entities(Rating.rating).first()
+
             formatted_movies.append({
                 "id": movie.id,
                 "tmdb_id": movie.tmdb_id,
                 "title": movie.title,
                 "overview": movie.overview,
                 "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{movie.poster_path}" if movie.poster_path else None,
+                "user_rating": user_rating[0] if user_rating else 0
             })
 
         return jsonify({"movies": formatted_movies, "total_count": total_count}), 200
@@ -62,13 +72,15 @@ def get_all_movies_catalog():
 
 @movie_bp.route("/<int:tmdb_id>/details", methods=["GET"])
 def movie_details(tmdb_id):
-    movie = None
+    movie = Movie.query.filter_by(tmdb_id=tmdb_id).first()
 
     if not movie:
         movie_data = get_movie_details(tmdb_id)
         if not movie_data:
             return jsonify({"error": "Filme não encontrado"}), 404
         movie = Movie(**movie_data)
+        db.session.add(movie)
+        db.session.commit()
 
     return jsonify(
         {
@@ -106,27 +118,34 @@ def rate_movie(tmdb_id):
         return jsonify({"error": "Usuário não autenticado"}), 401
 
     try:
-        movie = None
+        movie = Movie.query.filter_by(tmdb_id=tmdb_id).first()
         if not movie:
             movie_data = get_movie_details(tmdb_id)
             if not movie_data:
                 return jsonify({"error": "Filme não encontrado."}), 404
 
             movie = Movie(**movie_data)
+            db.session.add(movie)
+            db.session.commit()
 
-        existing_rating = None
+        existing_rating = Rating.query.filter_by(
+            user_id=user_id, movie_id=movie.id).first()
+
         if existing_rating:
             existing_rating.rating = rating
         else:
             new_rating = Rating(
                 user_id=user_id,
                 movie_id=movie.id,
-                tmdb_id=tmdb_id,
                 rating=rating
             )
+            db.session.add(new_rating)
+
+        db.session.commit()
 
         return jsonify({"message": "✔ Avaliação salva com sucesso!"}), 200
 
     except Exception as e:
+        db.session.rollback()
         print(f"❌ Erro de DB/Processamento na avaliação: {e}")
         return jsonify({"error": f"Falha ao salvar a avaliação: {e}"}), 422
