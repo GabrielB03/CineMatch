@@ -6,7 +6,7 @@ import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import { Typography } from '@mui/material';
 
-const API_BASE_URL = 'https://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://cinematch-api-mhxk.onrender.com';
 
 const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
     const initialStars = Math.round(initialRating / 2);
