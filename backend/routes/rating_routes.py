@@ -31,7 +31,6 @@ def get_content_model_and_details(content_type, tmdb_id):
 
         content = Model(**content_data)
         db.session.add(content)
-        db.session.commit()
 
     return Model, content, id_field
 
