@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CineMatchLogo from '../assets/cinematch.png';
 import { getToken, removeToken } from '../utils/authApi';
 import ThemeSwitch from './ThemeSwitch';
-import { AppBar, Toolbar, Button, Typography, Box } from '@mui/material';
+import { AppBar, Toolbar, Button, Typography, Box, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
     const isAuthenticated = !!getToken();
     const navigate = useNavigate();
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
     const handleLogout = () => {
         removeToken();
         navigate('/login');
+    };
+
+    const toggleDrawer = (open) => (event) => {
+        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return;
+        }
+        setDrawerOpen(open);
     };
 
     const navButtonSx = {
@@ -21,6 +30,44 @@ const Layout = ({ children, headerTitle }) => {
         minWidth: 0,
         padding: '6px 8px',
     };
+
+    const navItems = [
+        { label: 'Recomendações', path: '/recommendations', isAuthenticated: true },
+        { label: 'Wishlist', path: '/wishlist', isAuthenticated: true, icon: FavoriteBorderIcon },
+        { label: 'Minhas Notas', path: '/my-ratings', isAuthenticated: true },
+        { label: 'Comunidade', path: '/users', isAuthenticated: true },
+        { label: 'Gêneros', path: '/genres', isAuthenticated: true },
+        { label: 'CONTA', path: '/account', isAuthenticated: true },
+        { label: 'Login', path: '/login', isAuthenticated: false },
+        { label: 'Registrar', path: '/register', isAuthenticated: false },
+    ].filter(item => isAuthenticated === item.isAuthenticated || (isAuthenticated && item.isAuthenticated));
+
+
+    const drawerList = (
+        <Box
+            sx={{ width: 250 }}
+            role="presentation"
+            onClick={toggleDrawer(false)}
+            onKeyDown={toggleDrawer(false)}
+        >
+            <List>
+                {navItems.map((item) => (
+                    <ListItem key={item.label} disablePadding>
+                        <ListItemButton component={Link} to={item.path}>
+                            <ListItemText primary={item.label} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+                {isAuthenticated && (
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
+                            <ListItemText primary="Sair" />
+                        </ListItemButton>
+                    </ListItem>
+                )}
+            </List>
+        </Box>
+    );
 
     return (
         <div className="app-wrapper">
@@ -39,12 +86,12 @@ const Layout = ({ children, headerTitle }) => {
                     </Box>
 
                     {headerTitle && (
-                        <Typography 
+                        <Typography
                             variant="h6"
-                            component="h1" 
-                            sx={{ 
-                                ml: 2, 
-                                flexGrow: 1, 
+                            component="h1"
+                            sx={{
+                                ml: 2,
+                                flexGrow: 1,
                                 textAlign: 'left',
                                 display: { xs: 'none', md: 'block' }
                             }}
@@ -52,79 +99,87 @@ const Layout = ({ children, headerTitle }) => {
                             {headerTitle}
                         </Typography>
                     )}
+                    
+                    <IconButton
+                        color="inherit"
+                        aria-label="open drawer"
+                        edge="start"
+                        onClick={toggleDrawer(true)}
+                        sx={{ mr: 2, display: { md: 'none' } }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
                         <ThemeSwitch />
-                        <nav style={{ marginLeft: 10, display: 'flex' }}>
-                            {isAuthenticated ? (
-                                <>
-                                    <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                                        <Button color="inherit" component={Link} to="/recommendations" sx={navButtonSx}>
-                                            Recomendações
+                        
+                        <nav style={{ marginLeft: 10 }}>
+                            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+                                {isAuthenticated ? (
+                                    <>
+                                        {navItems.filter(i => i.isAuthenticated).map(item => (
+                                            <Button
+                                                key={item.path}
+                                                color="inherit"
+                                                component={Link}
+                                                to={item.path}
+                                                sx={navButtonSx}
+                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem' }} /> : null}
+                                            >
+                                                {item.label}
+                                            </Button>
+                                        ))}
+                                        
+                                        <Button
+                                            onClick={handleLogout}
+                                            variant="outlined"
+                                            color="secondary"
+                                            size="small"
+                                            startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
+                                            sx={{
+                                                ml: 1,
+                                                borderColor: 'primary.contrastText',
+                                                fontSize: '0.8rem',
+                                                padding: '4px 8px',
+                                                '&:hover': {
+                                                    borderColor: 'secondary.main',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                }
+                                            }}
+                                        >
+                                            Sair
                                         </Button>
-                                        <Button color="inherit" component={Link} to="/wishlist" startIcon={<FavoriteBorderIcon sx={{ fontSize: '1rem' }} />} sx={navButtonSx}>
-                                            Wishlist
-                                        </Button>
-                                        <Button color="inherit" component={Link} to="/my-ratings" sx={navButtonSx}>
-                                            Minhas Notas
-                                        </Button>
-                                        <Button color="inherit" component={Link} to="/users" sx={navButtonSx}>
-                                            Comunidade
-                                        </Button>
-                                        <Button color="inherit" component={Link} to="/genres" sx={navButtonSx}>
-                                            Gêneros
-                                        </Button>
-                                        <Button color="inherit" component={Link} to="/account" sx={navButtonSx}>
-                                            CONTA
-                                        </Button>
-                                    </Box>
-                                    
-                                    <Button 
-                                        onClick={handleLogout}
-                                        variant="outlined"
-                                        color="secondary"
-                                        size="small"
-                                        startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                        sx={{ 
-                                            ml: 1, 
-                                            borderColor: 'primary.contrastText',
-                                            fontSize: '0.8rem',
-                                            padding: '4px 8px',
-                                            '&:hover': {
-                                                borderColor: 'secondary.main',
-                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                            }
-                                        }}
-                                    >
-                                        Sair
-                                    </Button>
-                                </>
-                            ) : (
-                                <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                                    <Button color="inherit" component={Link} to="/login" sx={navButtonSx}>
-                                        Login
-                                    </Button>
-                                    <Button 
-                                        color="inherit" 
-                                        variant="outlined" 
-                                        component={Link} 
-                                        to="/register" 
-                                        sx={{ 
-                                            ml: 1,
-                                            borderColor: 'primary.contrastText',
-                                            fontSize: '0.8rem',
-                                            padding: '4px 8px',
-                                        }}
-                                    >
-                                        Registrar
-                                    </Button>
-                                </Box>
-                            )}
+                                    </>
+                                ) : (
+                                    <>
+                                        {navItems.filter(i => !i.isAuthenticated).map(item => (
+                                            <Button 
+                                                key={item.path}
+                                                color="inherit"
+                                                component={Link}
+                                                to={item.path}
+                                                sx={navButtonSx}
+                                                variant={item.label === 'Registrar' ? 'outlined' : 'text'}
+                                            >
+                                                {item.label}
+                                            </Button>
+                                        ))}
+                                    </>
+                                )}
+                            </Box>
                         </nav>
                     </Box>
                 </Toolbar>
             </AppBar>
-
+            
+            <Drawer
+                anchor="left"
+                open={drawerOpen}
+                onClose={toggleDrawer(false)}
+            >
+                {drawerList}
+            </Drawer>
+            
             <main style={{ padding: '20px' }}>
                 {children}
             </main>
@@ -133,7 +188,7 @@ const Layout = ({ children, headerTitle }) => {
                 <p>&copy; 2025 CineMatch. Todos os direitos reservados.</p>
             </footer>
         </div>
-    )
-}
+    );
+};
 
 export default Layout;
