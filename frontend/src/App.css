@@ -459,18 +459,38 @@ body.dark-mode .empty-message {
   }
   
   .MuiCard-root {
-    flex-direction: column; 
+    flex-direction: column;
     height: auto !important;
   }
   
   .MuiCardMedia-img {
-    width: 100% !important; 
+    width: 100% !important;
     height: auto !important;
-    max-height: 250px; 
+    max-height: 250px;
     margin: 0 0 10px 0;
   }
   
   .MuiCardContent-root {
     min-height: auto;
+  }
+  
+  .MuiToolbar-root {
+    justify-content: space-between;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  .MuiToolbar-root > .MuiBox-root:first-of-type {
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+  }
+  
+  
+  .MuiToolbar-root > .MuiBox-root:last-of-type {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 }
