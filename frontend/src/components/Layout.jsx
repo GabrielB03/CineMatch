@@ -74,17 +74,32 @@ const Layout = ({ children, headerTitle }) => {
     return (
         <div className="app-wrapper">
             <AppBar position="static" color="primary">
-                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60 }}> 
-                    <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-                        <Link
-                            to="/"
-                            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
-                        >
-                            <img src={CineMatchLogo} alt="CineMatch Logo" style={{ height: 40, marginRight: 8 }} />
-                            <Typography variant="h6" component="div" sx={{ display: { xs: 'block', sm: 'block' } }}>
-                                CineMatch
-                            </Typography>
-                        </Link>
+                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 } }}> 
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                edge="start"
+                                onClick={toggleDrawer(true)}
+                                sx={{ mr: 1 }} 
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                        </Box>
+
+                        <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                            <Link
+                                to="/"
+                                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
+                            >
+                                <img src={CineMatchLogo} alt="CineMatch Logo" style={{ height: 40, marginRight: 8 }} />
+                                <Typography variant="h6" component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                    CineMatch
+                                </Typography>
+                            </Link>
+                        </Box>
                     </Box>
 
                     {headerTitle && (
@@ -102,16 +117,6 @@ const Layout = ({ children, headerTitle }) => {
                         </Typography>
                     )}
                     
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        edge="start"
-                        onClick={toggleDrawer(true)}
-                        sx={{ mr: 2, display: { md: 'none' } }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-
                     <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
                         <ThemeSwitch />
                         
@@ -150,14 +155,14 @@ const Layout = ({ children, headerTitle }) => {
                                             </Button>
                                         ))}
                                         
-                                        <Button 
+                                        <Button
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                            sx={{ 
-                                                ml: 1, 
+                                            sx={{
+                                                ml: 1,
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
