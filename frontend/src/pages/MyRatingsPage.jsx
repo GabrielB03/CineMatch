@@ -25,13 +25,20 @@ const MyRatingsPage = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`${API_URL}/ratings/user/ratings`, {
-                withCredentials: true,
+            const response = await fetchWithAuth(`ratings/user/ratings`, { // USANDO fetchWithAuth
+                method: 'GET',
             });
-            setRatings(response.data);
+            const data = await response.json();
+            setRatings(data);
             setLoading(false);
         } catch (err) {
             console.error(err);
+             if (err.message && err.message.includes("401")) {
+                removeToken();
+                navigate('/login');
+                setError("Sessão expirada. Faça login novamente.");
+                return;
+            }
             setError("Falha ao carregar suas avaliações.");
             setLoading(false);
         }
@@ -40,16 +47,16 @@ const MyRatingsPage = () => {
     const handleRatingChange = (ratingId, newScore) => {
         const rawScore = newScore * 2; 
         
-        setRatings(prevRatings => 
-            prevRatings.map(r => 
+        setRatings(prevRatings =>
+            prevRatings.map(r =>
                 r.id === ratingId ? { ...r, rating: rawScore } : r
             )
         );
     };
 
     const handleCommentChange = (ratingId, newComment) => {
-        setRatings(prevRatings => 
-            prevRatings.map(r => 
+        setRatings(prevRatings =>
+            prevRatings.map(r =>
                 r.id === ratingId ? { ...r, comment: newComment } : r
             )
         );
@@ -74,8 +81,8 @@ const MyRatingsPage = () => {
             await fetchWithAuth(`ratings/ratings/${ratingId}`, {
                 method: 'PUT',
                 body: JSON.stringify({
-                    rating: ratingItem.rating, 
-                    comment: ratingItem.comment || null, 
+                    rating: ratingItem.rating,
+                    comment: ratingItem.comment || null,
                 }),
             });
             
@@ -98,13 +105,13 @@ const MyRatingsPage = () => {
             
             const original = editStates[ratingId];
             if (original) {
-                 setRatings(prevRatings => 
-                    prevRatings.map(r => 
-                        r.id === ratingId ? 
-                        { 
-                            ...r, 
-                            rating: original.originalRating, 
-                            comment: original.originalComment 
+                setRatings(prevRatings =>
+                    prevRatings.map(r =>
+                        r.id === ratingId ?
+                        {
+                            ...r,
+                            rating: original.originalRating,
+                            comment: original.originalComment
                         } : r
                     )
                 );
@@ -119,13 +126,13 @@ const MyRatingsPage = () => {
     const handleCancel = (ratingId) => {
         const original = editStates[ratingId];
         if (original) {
-             setRatings(prevRatings => 
-                prevRatings.map(r => 
-                    r.id === ratingId ? 
-                    { 
-                        ...r, 
-                        rating: original.originalRating, 
-                        comment: original.originalComment 
+             setRatings(prevRatings =>
+                prevRatings.map(r =>
+                    r.id === ratingId ?
+                    {
+                        ...r,
+                        rating: original.originalRating,
+                        comment: original.originalComment
                     } : r
                 )
             );
@@ -148,8 +155,8 @@ const MyRatingsPage = () => {
             setError("Avaliação removida com sucesso!");
 
         } catch (err) {
-             console.error("Erro ao deletar avaliação:", err);
-             setError("Erro ao remover a avaliação. Tente novamente.");
+            console.error("Erro ao deletar avaliação:", err);
+            setError("Erro ao remover a avaliação. Tente novamente.");
         }
     };
 
@@ -163,10 +170,8 @@ const MyRatingsPage = () => {
         if (!posterPath) {
             return '/placeholder.png';
         }
-        if (posterPath.startsWith('http')) {
-            return posterPath;
-        }
-        return `${TMDB_IMAGE_BASE_URL}${posterPath}`;
+
+        return posterPath;
     };
 
     if (loading) {
@@ -197,7 +202,7 @@ const MyRatingsPage = () => {
                             const isEditing = editStates[item.id]?.isEditing;
                             
                             const rawRating = item.rating; 
-                            const convertedRating = rawRating / 2; 
+                            const convertedRating = rawRating / 2;
                             const currentComment = item.comment;
 
                             return (
@@ -220,7 +225,7 @@ const MyRatingsPage = () => {
                                             {isEditing ? (
                                                 <Rating
                                                     name={`rating-${item.id}`}
-                                                    value={rawRating / 2} 
+                                                    value={rawRating / 2}
                                                     max={5} 
                                                     onChange={(event, newValue) => {
                                                         if (newValue !== null) handleRatingChange(item.id, newValue);
@@ -260,8 +265,8 @@ const MyRatingsPage = () => {
                                             {isEditing ? (
                                                 <Box>
                                                     <Button 
-                                                        variant="contained" 
-                                                        color="primary" 
+                                                        variant="contained"
+                                                        color="primary"
                                                         size="small"
                                                         onClick={() => handleSave(item.id)}
                                                         sx={{ mr: 1 }}
@@ -286,7 +291,7 @@ const MyRatingsPage = () => {
                                                         Editar
                                                     </Button>
                                                     <Button 
-                                                        variant="text" 
+                                                        variant="text"
                                                         color="error"
                                                         size="small"
                                                         startIcon={<DeleteIcon />}
