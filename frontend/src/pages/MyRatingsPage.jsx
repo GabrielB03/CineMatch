@@ -14,7 +14,7 @@ const MyRatingsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editStates, setEditStates] = useState({});
-    const [tabValue, setTabValue] = useState(0); 
+    const [tabValue, setTabValue] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -25,7 +25,7 @@ const MyRatingsPage = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetchWithAuth(`ratings/user/ratings`, { // USANDO fetchWithAuth
+            const response = await fetchWithAuth(`ratings/user/ratings`, {
                 method: 'GET',
             });
             const data = await response.json();
@@ -45,7 +45,7 @@ const MyRatingsPage = () => {
     };
 
     const handleRatingChange = (ratingId, newScore) => {
-        const rawScore = newScore * 2; 
+        const rawScore = newScore * 2;
         
         setRatings(prevRatings =>
             prevRatings.map(r =>
@@ -65,8 +65,8 @@ const MyRatingsPage = () => {
     const toggleEditMode = (ratingId, currentRating, currentComment) => {
         setEditStates(prev => ({
             ...prev,
-            [ratingId]: { 
-                isEditing: !prev[ratingId]?.isEditing, 
+            [ratingId]: {
+                isEditing: !prev[ratingId]?.isEditing,
                 originalRating: currentRating,
                 originalComment: currentComment
             }
@@ -105,7 +105,7 @@ const MyRatingsPage = () => {
             
             const original = editStates[ratingId];
             if (original) {
-                setRatings(prevRatings =>
+                 setRatings(prevRatings =>
                     prevRatings.map(r =>
                         r.id === ratingId ?
                         {
@@ -170,7 +170,6 @@ const MyRatingsPage = () => {
         if (!posterPath) {
             return '/placeholder.png';
         }
-
         return posterPath;
     };
 
@@ -201,7 +200,7 @@ const MyRatingsPage = () => {
                             const content = item.content;
                             const isEditing = editStates[item.id]?.isEditing;
                             
-                            const rawRating = item.rating; 
+                            const rawRating = item.rating;
                             const convertedRating = rawRating / 2;
                             const currentComment = item.comment;
 
@@ -226,7 +225,7 @@ const MyRatingsPage = () => {
                                                 <Rating
                                                     name={`rating-${item.id}`}
                                                     value={rawRating / 2}
-                                                    max={5} 
+                                                    max={5}
                                                     onChange={(event, newValue) => {
                                                         if (newValue !== null) handleRatingChange(item.id, newValue);
                                                     }}
@@ -284,7 +283,7 @@ const MyRatingsPage = () => {
                                             ) : (
                                                 <Box display="flex" justifyContent="space-between">
                                                     <Button 
-                                                        variant="outlined" 
+                                                        variant="outlined"
                                                         size="small"
                                                         onClick={() => toggleEditMode(item.id, rawRating, currentComment)}
                                                     >
