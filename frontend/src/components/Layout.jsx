@@ -17,9 +17,9 @@ const Layout = ({ children, headerTitle }) => {
     };
 
     const navButtonSx = {
-        fontSize: '0.8rem', // Reduz a fonte
+        fontSize: '0.8rem',
         minWidth: 0,
-        padding: '6px 8px', // Reduz o padding
+        padding: '6px 8px',
     };
 
     return (
@@ -32,7 +32,7 @@ const Layout = ({ children, headerTitle }) => {
                             style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
                         >
                             <img src={CineMatchLogo} alt="CineMatch Logo" style={{ height: 40, marginRight: 8 }} />
-                            <Typography variant="h6" component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            <Typography variant="h6" component="div" sx={{ display: { xs: 'block', sm: 'block' } }}>
                                 CineMatch
                             </Typography>
                         </Link>
@@ -40,7 +40,7 @@ const Layout = ({ children, headerTitle }) => {
 
                     {headerTitle && (
                         <Typography 
-                            variant="h6" // Reduz o tamanho do título no header
+                            variant="h6"
                             component="h1" 
                             sx={{ 
                                 ml: 2, 
@@ -55,27 +55,29 @@ const Layout = ({ children, headerTitle }) => {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
                         <ThemeSwitch />
-                        <nav style={{ marginLeft: 10 }}>
+                        <nav style={{ marginLeft: 10, display: 'flex' }}>
                             {isAuthenticated ? (
                                 <>
-                                    <Button color="inherit" component={Link} to="/recommendations" sx={navButtonSx}>
-                                        Recomendações
-                                    </Button>
-                                    <Button color="inherit" component={Link} to="/wishlist" startIcon={<FavoriteBorderIcon sx={{ fontSize: '1rem' }} />} sx={navButtonSx}>
-                                        Wishlist
-                                    </Button>
-                                    <Button color="inherit" component={Link} to="/my-ratings" sx={navButtonSx}>
-                                        Minhas Notas
-                                    </Button>
-                                    <Button color="inherit" component={Link} to="/users" sx={navButtonSx}>
-                                        Comunidade
-                                    </Button>
-                                    <Button color="inherit" component={Link} to="/genres" sx={navButtonSx}>
-                                        Gêneros
-                                    </Button>
-                                    <Button color="inherit" component={Link} to="/account" sx={navButtonSx}>
-                                        CONTA
-                                    </Button>
+                                    <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                                        <Button color="inherit" component={Link} to="/recommendations" sx={navButtonSx}>
+                                            Recomendações
+                                        </Button>
+                                        <Button color="inherit" component={Link} to="/wishlist" startIcon={<FavoriteBorderIcon sx={{ fontSize: '1rem' }} />} sx={navButtonSx}>
+                                            Wishlist
+                                        </Button>
+                                        <Button color="inherit" component={Link} to="/my-ratings" sx={navButtonSx}>
+                                            Minhas Notas
+                                        </Button>
+                                        <Button color="inherit" component={Link} to="/users" sx={navButtonSx}>
+                                            Comunidade
+                                        </Button>
+                                        <Button color="inherit" component={Link} to="/genres" sx={navButtonSx}>
+                                            Gêneros
+                                        </Button>
+                                        <Button color="inherit" component={Link} to="/account" sx={navButtonSx}>
+                                            CONTA
+                                        </Button>
+                                    </Box>
                                     
                                     <Button 
                                         onClick={handleLogout}
@@ -98,7 +100,7 @@ const Layout = ({ children, headerTitle }) => {
                                     </Button>
                                 </>
                             ) : (
-                                <>
+                                <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                                     <Button color="inherit" component={Link} to="/login" sx={navButtonSx}>
                                         Login
                                     </Button>
@@ -116,7 +118,7 @@ const Layout = ({ children, headerTitle }) => {
                                     >
                                         Registrar
                                     </Button>
-                                </>
+                                </Box>
                             )}
                         </nav>
                     </Box>
