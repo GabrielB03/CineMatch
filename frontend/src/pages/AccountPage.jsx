@@ -48,7 +48,7 @@ const AccountPage = () => {
         if (getToken()) {
             fetchUserProfile();
         } else {
-             navigate('/login');
+            navigate('/login');
         }
         
     }, [navigate]);

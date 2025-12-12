@@ -34,7 +34,7 @@ class Config:
 
     TMDB_API_KEY = os.getenv('TMDB_API_KEY', 'SUA_CHAVE_TMDB')
     TMDB_BASE_URL = "https://api.themoviedb.org/3"
-    TMDB_IMAGE_BASE_URL = "https://image.themoviedb.org/t/p/w500"
+    TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original"
 
     FRONTEND_PATH = os.path.abspath(os.path.join(
         os.path.dirname(__file__), '..', 'frontend', 'dist'))

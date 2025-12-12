@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://cinematch-api-mhxk.onrender.com';
-const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/original';
 
 const MyRatingsPage = () => {
     const [ratings, setRatings] = useState([]);
