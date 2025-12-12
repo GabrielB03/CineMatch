@@ -38,10 +38,12 @@ const Layout = ({ children, headerTitle }) => {
         { label: 'Comunidade', path: '/users', isAuthenticated: true },
         { label: 'Gêneros', path: '/genres', isAuthenticated: true },
         { label: 'CONTA', path: '/account', isAuthenticated: true },
+    ];
+
+    const unauthenticatedNavItems = [
         { label: 'Login', path: '/login', isAuthenticated: false },
         { label: 'Registrar', path: '/register', isAuthenticated: false },
-    ].filter(item => isAuthenticated === item.isAuthenticated || (isAuthenticated && item.isAuthenticated));
-
+    ];
 
     const drawerList = (
         <Box
@@ -51,7 +53,7 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {navItems.map((item) => (
+                {(isAuthenticated ? navItems : unauthenticatedNavItems).map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -113,11 +115,29 @@ const Layout = ({ children, headerTitle }) => {
                     <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
                         <ThemeSwitch />
                         
+                        {isAuthenticated && (
+                            <Button 
+                                onClick={handleLogout}
+                                variant="outlined"
+                                color="secondary"
+                                size="small"
+                                sx={{
+                                    ml: 1,
+                                    borderColor: 'primary.contrastText',
+                                    fontSize: '0.8rem',
+                                    padding: '4px 8px',
+                                    display: { xs: 'block', md: 'none' }
+                                }}
+                            >
+                                Sair
+                            </Button>
+                        )}
+
                         <nav style={{ marginLeft: 10 }}>
-                            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+                            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}> 
                                 {isAuthenticated ? (
                                     <>
-                                        {navItems.filter(i => i.isAuthenticated).map(item => (
+                                        {navItems.map(item => (
                                             <Button
                                                 key={item.path}
                                                 color="inherit"
@@ -130,17 +150,18 @@ const Layout = ({ children, headerTitle }) => {
                                             </Button>
                                         ))}
                                         
-                                        <Button
+                                        <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                            sx={{
-                                                ml: 1,
+                                            sx={{ 
+                                                ml: 1, 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
+                                                display: { xs: 'none', md: 'block' },
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -152,8 +173,8 @@ const Layout = ({ children, headerTitle }) => {
                                     </>
                                 ) : (
                                     <>
-                                        {navItems.filter(i => !i.isAuthenticated).map(item => (
-                                            <Button 
+                                        {unauthenticatedNavItems.map(item => (
+                                            <Button
                                                 key={item.path}
                                                 color="inherit"
                                                 component={Link}
