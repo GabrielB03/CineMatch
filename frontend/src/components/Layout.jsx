@@ -53,20 +53,19 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {(isAuthenticated ? navItems : unauthenticatedNavItems).filter(item => item.isAuthenticated === isAuthenticated).map((item) => (
+                {navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {isAuthenticated && (
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
-                            <ListItemText primary="Sair" />
-                        </ListItemButton>
-                    </ListItem>
-                )}
+                {/* Botão Sair dentro do Drawer */}
+                <ListItem disablePadding>
+                    <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
+                        <ListItemText primary="Sair" />
+                    </ListItemButton>
+                </ListItem>
             </List>
         </Box>
     );
@@ -76,7 +75,7 @@ const Layout = ({ children, headerTitle }) => {
             <AppBar position="static" color="primary">
                 <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 }, paddingLeft: { xs: 1, sm: 2 } }}> 
                     
-                    <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
                         {isAuthenticated && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
@@ -116,7 +115,7 @@ const Layout = ({ children, headerTitle }) => {
                         )}
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto', gap: { xs: 1, md: 2 } }}>
                         <ThemeSwitch />
                         
                         <nav>
@@ -136,6 +135,7 @@ const Layout = ({ children, headerTitle }) => {
                                             </Button>
                                         ))}
                                         
+                                        {/* Botão Sair (Desktop) */}
                                         <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
@@ -146,25 +146,22 @@ const Layout = ({ children, headerTitle }) => {
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                // Torna o botão Sair visível no mobile e desktop
-                                                display: { xs: 'block', md: 'block' },
+                                                display: { xs: 'none', md: 'block' },
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                                 }
                                             }}
                                         >
-                                            <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>Sair</Box>
+                                            Sair
                                         </Button>
-
-                                        {/* Botão SAIR mobile (apenas texto) */}
-                                        <Button 
+                                        
+                                        <Button
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
-                                            sx={{ 
-                                                ml: 1, 
+                                            sx={{
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
@@ -196,6 +193,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
+            {/* Drawer (Menu Hamburger) só aparece se logado */}
             {isAuthenticated && (
                 <Drawer
                     anchor="left"
