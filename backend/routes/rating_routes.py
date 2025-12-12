@@ -97,6 +97,8 @@ def user_ratings():
         result = []
 
         for rating, movie in movie_ratings:
+            poster_url = f"{Config.TMDB_IMAGE_BASE_URL}{movie.poster_path}" if movie.poster_path else "/placeholder.png"
+
             result.append({
                 "id": rating.id,
                 "rating": rating.rating,
@@ -107,11 +109,13 @@ def user_ratings():
                     "id": movie.id,
                     "tmdb_id": movie.tmdb_id,
                     "title": movie.title,
-                    "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{movie.poster_path}" if movie.poster_path else None,
+                    "poster_path": poster_url,
                 }
             })
 
         for rating, tv_show in tv_show_ratings:
+            poster_url = f"{Config.TMDB_IMAGE_BASE_URL}{tv_show.poster_path}" if tv_show.poster_path else "/placeholder.png"
+
             result.append({
                 "id": rating.id,
                 "rating": rating.rating,
@@ -122,7 +126,7 @@ def user_ratings():
                     "id": tv_show.id,
                     "tmdb_id": tv_show.tmdb_id,
                     "title": tv_show.title,
-                    "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{tv_show.poster_path}" if tv_show.poster_path else None,
+                    "poster_path": poster_url,
                 }
             })
 
@@ -210,6 +214,8 @@ def get_user_ratings_by_id(user_id):
         result = []
 
         for rating, movie in movie_ratings:
+            poster_url = f"{Config.TMDB_IMAGE_BASE_URL}{movie.poster_path}" if movie.poster_path else "/placeholder.png"
+
             result.append({
                 "id": rating.id,
                 "rating": rating.rating,
@@ -220,11 +226,13 @@ def get_user_ratings_by_id(user_id):
                     "id": movie.id,
                     "tmdb_id": movie.tmdb_id,
                     "title": movie.title,
-                    "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{movie.poster_path}" if movie.poster_path else None,
+                    "poster_path": poster_url,
                 }
             })
 
         for rating, tv_show in tv_show_ratings:
+            poster_url = f"{Config.TMDB_IMAGE_BASE_URL}{tv_show.poster_path}" if tv_show.poster_path else "/placeholder.png"
+
             result.append({
                 "id": rating.id,
                 "rating": rating.rating,
@@ -235,7 +243,7 @@ def get_user_ratings_by_id(user_id):
                     "id": tv_show.id,
                     "tmdb_id": tv_show.tmdb_id,
                     "title": tv_show.title,
-                    "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{tv_show.poster_path}" if tv_show.poster_path else None,
+                    "poster_path": poster_url,
                 }
             })
 
