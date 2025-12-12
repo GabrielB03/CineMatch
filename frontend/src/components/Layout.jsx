@@ -118,7 +118,7 @@ const Layout = ({ children, headerTitle }) => {
                         <ThemeSwitch />
                         
                         <nav>
-                            <Box sx={{ display: 'flex', gap: 1 }}> 
+                            <Box sx={{ display: 'flex', gap: 1 }}>
                                 {isAuthenticated ? (
                                     <>
                                         {navItems.map(item => (
@@ -154,12 +154,12 @@ const Layout = ({ children, headerTitle }) => {
                                             Sair
                                         </Button>
                                         
-                                        <Button
+                                        <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
-                                            sx={{
+                                            sx={{ 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
@@ -177,7 +177,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 color="inherit"
                                                 component={Link}
                                                 to={item.path}
-                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
+                                                sx={{ ...navButtonSx, display: { xs: 'inline-flex', md: 'inline-flex' } }}
                                                 variant={item.label === 'Registrar' ? 'outlined' : 'text'}
                                             >
                                                 {item.label}
