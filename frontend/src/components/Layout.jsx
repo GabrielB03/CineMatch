@@ -76,30 +76,30 @@ const Layout = ({ children, headerTitle }) => {
             <AppBar position="static" color="primary">
                 <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 } }}> 
                     
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {isAuthenticated && (
                         <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                             <IconButton
                                 color="inherit"
                                 aria-label="open drawer"
                                 edge="start"
                                 onClick={toggleDrawer(true)}
-                                sx={{ mr: 1 }} 
+                                sx={{ mr: 1 }}
                             >
                                 <MenuIcon />
                             </IconButton>
                         </Box>
+                    )}
 
-                        <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-                            <Link
-                                to="/"
-                                style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
-                            >
-                                <img src={CineMatchLogo} alt="CineMatch Logo" style={{ height: 40, marginRight: 8 }} />
-                                <Typography variant="h6" component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                                    CineMatch
-                                </Typography>
-                            </Link>
-                        </Box>
+                    <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                        <Link
+                            to="/"
+                            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
+                        >
+                            <img src={CineMatchLogo} alt="CineMatch Logo" style={{ height: 40, marginRight: 8 }} />
+                            <Typography variant="h6" component="div" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                CineMatch
+                            </Typography>
+                        </Link>
                     </Box>
 
                     {headerTitle && (
@@ -126,12 +126,12 @@ const Layout = ({ children, headerTitle }) => {
                                 variant="outlined"
                                 color="secondary"
                                 size="small"
-                                sx={{
-                                    ml: 1,
+                                sx={{ 
+                                    ml: 1, 
                                     borderColor: 'primary.contrastText',
                                     fontSize: '0.8rem',
                                     padding: '4px 8px',
-                                    display: { xs: 'block', md: 'none' }
+                                    display: { xs: 'block', md: 'none' } 
                                 }}
                             >
                                 Sair
@@ -155,14 +155,14 @@ const Layout = ({ children, headerTitle }) => {
                                             </Button>
                                         ))}
                                         
-                                        <Button
+                                        <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                            sx={{
-                                                ml: 1,
+                                            sx={{ 
+                                                ml: 1, 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
@@ -198,13 +198,15 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            <Drawer
-                anchor="left"
-                open={drawerOpen}
-                onClose={toggleDrawer(false)}
-            >
-                {drawerList}
-            </Drawer>
+            {isAuthenticated && (
+                <Drawer
+                    anchor="left"
+                    open={drawerOpen}
+                    onClose={toggleDrawer(false)}
+                >
+                    {drawerList}
+                </Drawer>
+            )}
             
             <main style={{ padding: '20px' }}>
                 {children}

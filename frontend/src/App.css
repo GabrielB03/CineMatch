@@ -455,7 +455,8 @@ body.dark-mode .empty-message {
   }
 
   h1, h2 {
-    font-size: 1.4rem;
+    font-size: 8vw;
+    line-height: 1.1;
   }
   
   .MuiCard-root {
