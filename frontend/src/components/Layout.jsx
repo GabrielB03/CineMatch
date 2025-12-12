@@ -53,7 +53,7 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {(isAuthenticated ? navItems : unauthenticatedNavItems).map((item) => (
+                {(isAuthenticated ? navItems : unauthenticatedNavItems).filter(item => item.isAuthenticated === isAuthenticated).map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -74,23 +74,24 @@ const Layout = ({ children, headerTitle }) => {
     return (
         <div className="app-wrapper">
             <AppBar position="static" color="primary">
-                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 } }}> 
+                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 }, paddingLeft: { xs: 1, sm: 2 } }}> 
                     
-                    {isAuthenticated && (
-                        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
-                            <IconButton
-                                color="inherit"
-                                aria-label="open drawer"
-                                edge="start"
-                                onClick={toggleDrawer(true)}
-                                sx={{ mr: 1 }}
-                            >
-                                <MenuIcon />
-                            </IconButton>
-                        </Box>
-                    )}
+                    <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                        
+                        {isAuthenticated && (
+                            <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="open drawer"
+                                    edge="start"
+                                    onClick={toggleDrawer(true)}
+                                    sx={{ mr: 1 }} 
+                                >
+                                    <MenuIcon />
+                                </IconButton>
+                            </Box>
+                        )}
 
-                    <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
                         <Link
                             to="/"
                             style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
@@ -100,46 +101,26 @@ const Layout = ({ children, headerTitle }) => {
                                 CineMatch
                             </Typography>
                         </Link>
-                    </Box>
 
-                    {headerTitle && (
-                        <Typography
-                            variant="h6"
-                            component="h1"
-                            sx={{
-                                ml: 2,
-                                flexGrow: 1,
-                                textAlign: 'left',
-                                display: { xs: 'none', md: 'block' }
-                            }}
-                        >
-                            {headerTitle}
-                        </Typography>
-                    )}
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
-                        <ThemeSwitch />
-                        
-                        {isAuthenticated && (
-                            <Button 
-                                onClick={handleLogout}
-                                variant="outlined"
-                                color="secondary"
-                                size="small"
-                                sx={{ 
-                                    ml: 1, 
-                                    borderColor: 'primary.contrastText',
-                                    fontSize: '0.8rem',
-                                    padding: '4px 8px',
-                                    display: { xs: 'block', md: 'none' } 
+                        {headerTitle && (
+                            <Typography
+                                variant="h6"
+                                component="h1"
+                                sx={{
+                                    ml: 2,
+                                    display: { xs: 'none', md: 'block' }
                                 }}
                             >
-                                Sair
-                            </Button>
+                                {headerTitle}
+                            </Typography>
                         )}
+                    </Box>
 
-                        <nav style={{ marginLeft: 10 }}>
-                            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}> 
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
+                        <ThemeSwitch />
+                        
+                        <nav>
+                            <Box sx={{ display: 'flex', gap: 1 }}> 
                                 {isAuthenticated ? (
                                     <>
                                         {navItems.map(item => (
@@ -148,8 +129,8 @@ const Layout = ({ children, headerTitle }) => {
                                                 color="inherit"
                                                 component={Link}
                                                 to={item.path}
-                                                sx={navButtonSx}
-                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem' }} /> : null}
+                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
+                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
                                             >
                                                 {item.label}
                                             </Button>
@@ -162,15 +143,32 @@ const Layout = ({ children, headerTitle }) => {
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
                                             sx={{ 
-                                                ml: 1, 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'none', md: 'block' },
+                                                // Torna o botão Sair visível no mobile e desktop
+                                                display: { xs: 'block', md: 'block' },
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                                 }
+                                            }}
+                                        >
+                                            <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>Sair</Box>
+                                        </Button>
+
+                                        {/* Botão SAIR mobile (apenas texto) */}
+                                        <Button 
+                                            onClick={handleLogout}
+                                            variant="outlined"
+                                            color="secondary"
+                                            size="small"
+                                            sx={{ 
+                                                ml: 1, 
+                                                borderColor: 'primary.contrastText',
+                                                fontSize: '0.8rem',
+                                                padding: '4px 8px',
+                                                display: { xs: 'block', md: 'none' } 
                                             }}
                                         >
                                             Sair
@@ -184,7 +182,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 color="inherit"
                                                 component={Link}
                                                 to={item.path}
-                                                sx={navButtonSx}
+                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
                                                 variant={item.label === 'Registrar' ? 'outlined' : 'text'}
                                             >
                                                 {item.label}
