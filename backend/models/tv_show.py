@@ -9,7 +9,7 @@ class TVShow(db.Model):
     overview = db.Column(db.Text)
     genres = db.Column(db.String(255))
     first_air_date = db.Column(db.String(10))
-    poster_path = db.Column(db.String(255))
+    poster_path = db.Column(db.String(255), nullable=False, default="")
     backdrop_path = db.Column(db.String(255))
     vote_average = db.Column(db.Float)
     vote_count = db.Column(db.Integer)

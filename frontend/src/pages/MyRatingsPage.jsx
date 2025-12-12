@@ -33,7 +33,7 @@ const MyRatingsPage = () => {
             setLoading(false);
         } catch (err) {
             console.error(err);
-             if (err.message && err.message.includes("401")) {
+            if (err.message && err.message.includes("401")) {
                 removeToken();
                 navigate('/login');
                 setError("Sessão expirada. Faça login novamente.");
@@ -167,10 +167,13 @@ const MyRatingsPage = () => {
     const contentTitle = tabValue === 0 ? "Filmes Avaliados" : "Séries Avaliadas";
     
     const getImagePath = (posterPath) => {
-        if (!posterPath) {
+        if (!posterPath || posterPath.trim() === '') {
             return '/placeholder.png';
         }
-        return posterPath;
+        if (posterPath.startsWith('http')) {
+            return posterPath;
+        }
+        return `${TMDB_IMAGE_BASE_URL}${posterPath}`; 
     };
 
     if (loading) {
