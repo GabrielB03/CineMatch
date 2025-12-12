@@ -60,7 +60,6 @@ const Layout = ({ children, headerTitle }) => {
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {/* Botão Sair dentro do Drawer */}
                 <ListItem disablePadding>
                     <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
                         <ListItemText primary="Sair" />
@@ -135,7 +134,6 @@ const Layout = ({ children, headerTitle }) => {
                                             </Button>
                                         ))}
                                         
-                                        {/* Botão Sair (Desktop) */}
                                         <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
@@ -165,7 +163,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'block', md: 'none' } 
+                                                display: { xs: 'block', md: 'none' }
                                             }}
                                         >
                                             Sair
@@ -193,7 +191,6 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {/* Drawer (Menu Hamburger) só aparece se logado */}
             {isAuthenticated && (
                 <Drawer
                     anchor="left"
