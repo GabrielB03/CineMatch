@@ -6,8 +6,6 @@ import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import { Typography, Button } from '@mui/material';
 
-const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://cinematch-api-mhxk.onrender.com';
-
 const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
     const initialStars = Math.round(initialRating / 2);
 
@@ -18,16 +16,15 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
     const navigate = useNavigate();
 
     const handleRatingClick = async (rating) => {
-        setFeedback(null);
-        setIsSaving(true);
-        
         const token = getToken();
         if (!token) {
             setFeedback({ message: "Você precisa estar logado para avaliar.", type: 'error' });
-            setIsSaving(false);
             setTimeout(() => navigate('/login'), 2000);
             return;
         }
+
+        setFeedback(null);
+        setIsSaving(true);
 
         const ratingData = {
             tmdb_id: tmdbId,
@@ -42,7 +39,8 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
             });
 
             if (response.status === 401) {
-                navigate('/login');
+                setFeedback({ message: "Sessão expirada. Faça login novamente.", type: 'error' });
+                setTimeout(() => navigate('/login'), 2000);
                 return;
             }
 
@@ -59,8 +57,9 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
             console.error(`Erro ao salvar avaliação de ${contentType}`, error);
 
             let errorMessage = "Erro ao salvar avaliação. ";
-            if (error.message.includes("Token expirado")) {
+            if (error.message.includes("Token expirado") || error.message.includes("401")) {
                 errorMessage = "Sessão expirada. Faça login novamente";
+                setTimeout(() => navigate('/login'), 2000);
             } else if (error.message.includes("não encontrado")) {
                 errorMessage = `${contentType.toUpperCase()} não encontrado no catálogo. Tente mais tarde.`;
             } else {
@@ -77,6 +76,13 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
     };
     
     const handleRemoveRating = async () => {
+        const token = getToken();
+        if (!token) {
+            setFeedback({ message: "Você precisa estar logado.", type: 'error' });
+            setTimeout(() => navigate('/login'), 2000);
+            return;
+        }
+
         setFeedback(null);
         setIsSaving(true);
         
@@ -125,10 +131,8 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
             <Box sx={{ display: 'inline-flex', gap: 0.5 }}>
                 {[...Array(5)].map((_, index) => {
                     const ratingValue = index + 1;
-
                     const currentRating = hoverRating || savedRating;
                     const isActive = ratingValue <= currentRating;
-
                     const StarComponent = isActive ? StarIcon : StarOutlineIcon;
 
                     return (

@@ -9,8 +9,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    const isReallyLoggedIn = !!getToken(); 
-    const isAuthenticated = true;
+    const isAuthenticated = !!getToken(); // Única variável de autenticação
 
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -34,17 +33,17 @@ const Layout = ({ children, headerTitle }) => {
     };
 
     const navItems = [
-        { label: 'Recomendações', path: '/recommendations', isAuthenticated: true },
-        { label: 'Wishlist', path: '/wishlist', isAuthenticated: true, icon: FavoriteBorderIcon },
-        { label: 'Minhas Notas', path: '/my-ratings', isAuthenticated: true },
-        { label: 'Comunidade', path: '/users', isAuthenticated: true },
-        { label: 'Gêneros', path: '/genres', isAuthenticated: true },
-        { label: 'CONTA', path: '/account', isAuthenticated: true },
+        { label: 'Recomendações', path: '/recommendations' },
+        { label: 'Wishlist', path: '/wishlist', icon: FavoriteBorderIcon },
+        { label: 'Minhas Notas', path: '/my-ratings' },
+        { label: 'Comunidade', path: '/users' },
+        { label: 'Gêneros', path: '/genres' },
+        { label: 'CONTA', path: '/account' },
     ];
 
     const unauthenticatedNavItems = [
-        { label: 'Login', path: '/login', isAuthenticated: false },
-        { label: 'Registrar', path: '/register', isAuthenticated: false },
+        { label: 'Login', path: '/login' },
+        { label: 'Registrar', path: '/register' },
     ];
 
     const drawerList = (
@@ -55,21 +54,21 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {isReallyLoggedIn && navItems.map((item) => (
+                {isAuthenticated && navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {isReallyLoggedIn && (
+                {isAuthenticated && (
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
                             <ListItemText primary="Sair" />
                         </ListItemButton>
                     </ListItem>
                 )}
-                {!isReallyLoggedIn && unauthenticatedNavItems.map((item) => (
+                {!isAuthenticated && unauthenticatedNavItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -87,7 +86,7 @@ const Layout = ({ children, headerTitle }) => {
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
-                        {isReallyLoggedIn && (
+                        {isAuthenticated && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                                 <IconButton
                                     color="inherit"
@@ -131,21 +130,24 @@ const Layout = ({ children, headerTitle }) => {
                         <nav>
                             <Box sx={{ display: 'flex', gap: 1 }}> 
                                 
-                                {navItems.map(item => (
-                                    <Button
-                                        key={item.path}
-                                        color="inherit"
-                                        component={Link}
-                                        to={item.path}
-                                        sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
-                                        startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
-                                    >
-                                        {item.label}
-                                    </Button>
-                                ))}
-
-                                {isReallyLoggedIn ? (
+                                {/* Navegação para usuários autenticados */}
+                                {isAuthenticated && (
                                     <>
+                                        {/* Menu desktop */}
+                                        {navItems.map(item => (
+                                            <Button
+                                                key={item.path}
+                                                color="inherit"
+                                                component={Link}
+                                                to={item.path}
+                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
+                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem' }} /> : null}
+                                            >
+                                                {item.label}
+                                            </Button>
+                                        ))}
+
+                                        {/* Botão Sair - Desktop */}
                                         <Button
                                             onClick={handleLogout}
                                             variant="outlined"
@@ -166,6 +168,7 @@ const Layout = ({ children, headerTitle }) => {
                                             Sair
                                         </Button>
                                         
+                                        {/* Botão Sair - Mobile */}
                                         <Button
                                             onClick={handleLogout}
                                             variant="outlined"
@@ -181,8 +184,12 @@ const Layout = ({ children, headerTitle }) => {
                                             Sair
                                         </Button>
                                     </>
-                                ) : (
+                                )}
+
+                                {/* Navegação para usuários não autenticados */}
+                                {!isAuthenticated && (
                                     <>
+                                        {/* Desktop */}
                                         {unauthenticatedNavItems.map(item => (
                                             <Button
                                                 key={item.path}
@@ -195,6 +202,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 {item.label}
                                             </Button>
                                         ))}
+                                        {/* Mobile */}
                                         {unauthenticatedNavItems.map(item => (
                                             <Button
                                                 key={item.path + '-mobile'}
@@ -203,9 +211,9 @@ const Layout = ({ children, headerTitle }) => {
                                                 to={item.path}
                                                 sx={{
                                                     ...navButtonSx,
-                                                    display: { xs: 'inline-flex', md: 'none' },
-                                                    variant: item.label === 'Registrar' ? 'outlined' : 'text'
+                                                    display: { xs: 'inline-flex', md: 'none' }
                                                 }}
+                                                variant={item.label === 'Registrar' ? 'outlined' : 'text'}
                                             >
                                                 {item.label}
                                             </Button>
@@ -218,7 +226,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {isReallyLoggedIn && (
+            {isAuthenticated && (
                 <Drawer
                     anchor="left"
                     open={drawerOpen}
