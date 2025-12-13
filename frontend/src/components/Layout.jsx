@@ -9,12 +9,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    // isAuthForRendering é SEMPRE TRUE para exibir as abas de navegação
-    const isAuthenticated = true; // !!getToken(); (Modificado para forçar a visibilidade das abas)
-    
-    // isLoggedOutRealmente é TRUE se o token for DUMMY, ou seja, usuário está tecnicamente deslogado
-    const isReallyLoggedIn = getToken() !== "DUMMY_TOKEN_CHECK"; 
-
+    const isAuthenticated = !!getToken();
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -58,21 +53,21 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {isReallyLoggedIn && navItems.map((item) => (
+                {isAuthenticated && navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {isReallyLoggedIn && (
+                {isAuthenticated && (
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
                             <ListItemText primary="Sair" />
                         </ListItemButton>
                     </ListItem>
                 )}
-                {!isReallyLoggedIn && unauthenticatedNavItems.map((item) => (
+                {!isAuthenticated && unauthenticatedNavItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -90,7 +85,7 @@ const Layout = ({ children, headerTitle }) => {
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
-                        {isReallyLoggedIn && (
+                        {isAuthenticated && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                                 <IconButton
                                     color="inherit"
@@ -132,7 +127,7 @@ const Layout = ({ children, headerTitle }) => {
                         <ThemeSwitch />
                         
                         <nav>
-                            <Box sx={{ display: 'flex', gap: 1 }}> 
+                            <Box sx={{ display: 'flex', gap: 1 }}>
                                 {navItems.map(item => (
                                     <Button
                                         key={item.path}
@@ -146,7 +141,7 @@ const Layout = ({ children, headerTitle }) => {
                                     </Button>
                                 ))}
 
-                                {isReallyLoggedIn ? (
+                                {isAuthenticated ? (
                                     <>
                                         <Button
                                             onClick={handleLogout}
@@ -205,7 +200,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {isReallyLoggedIn && (
+            {isAuthenticated && (
                 <Drawer
                     anchor="left"
                     open={drawerOpen}
