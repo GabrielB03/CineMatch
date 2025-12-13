@@ -61,7 +61,7 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
 
   if (mergedOptions.method !== "GET") {
     const csrfToken = getCookie("csrf_access_token");
-    
+
     if (csrfToken) {
       mergedOptions.headers["X-CSRF-TOKEN"] = csrfToken;
     }

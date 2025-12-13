@@ -9,7 +9,12 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    const isAuthenticated = !!getToken();
+    // isAuthForRendering é SEMPRE TRUE para exibir as abas de navegação
+    const isAuthenticated = true; // !!getToken(); (Modificado para forçar a visibilidade das abas)
+    
+    // isLoggedOutRealmente é TRUE se o token for DUMMY, ou seja, usuário está tecnicamente deslogado
+    const isReallyLoggedIn = getToken() !== "DUMMY_TOKEN_CHECK"; 
+
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -53,18 +58,27 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {navItems.map((item) => (
+                {isReallyLoggedIn && navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                <ListItem disablePadding>
-                    <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
-                        <ListItemText primary="Sair" />
-                    </ListItemButton>
-                </ListItem>
+                {isReallyLoggedIn && (
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
+                            <ListItemText primary="Sair" />
+                        </ListItemButton>
+                    </ListItem>
+                )}
+                {!isReallyLoggedIn && unauthenticatedNavItems.map((item) => (
+                    <ListItem key={item.label} disablePadding>
+                        <ListItemButton component={Link} to={item.path}>
+                            <ListItemText primary={item.label} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
             </List>
         </Box>
     );
@@ -76,14 +90,14 @@ const Layout = ({ children, headerTitle }) => {
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
-                        {isAuthenticated && (
+                        {isReallyLoggedIn && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                                 <IconButton
                                     color="inherit"
                                     aria-label="open drawer"
                                     edge="start"
                                     onClick={toggleDrawer(true)}
-                                    sx={{ mr: 1 }} 
+                                    sx={{ mr: 1 }}
                                 >
                                     <MenuIcon />
                                 </IconButton>
@@ -118,29 +132,29 @@ const Layout = ({ children, headerTitle }) => {
                         <ThemeSwitch />
                         
                         <nav>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                                {isAuthenticated ? (
+                            <Box sx={{ display: 'flex', gap: 1 }}> 
+                                {navItems.map(item => (
+                                    <Button
+                                        key={item.path}
+                                        color="inherit"
+                                        component={Link}
+                                        to={item.path}
+                                        sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
+                                        startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
+                                    >
+                                        {item.label}
+                                    </Button>
+                                ))}
+
+                                {isReallyLoggedIn ? (
                                     <>
-                                        {navItems.map(item => (
-                                            <Button
-                                                key={item.path}
-                                                color="inherit"
-                                                component={Link}
-                                                to={item.path}
-                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
-                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
-                                            >
-                                                {item.label}
-                                            </Button>
-                                        ))}
-                                        
-                                        <Button 
+                                        <Button
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                            sx={{ 
+                                            sx={{
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
@@ -154,12 +168,12 @@ const Layout = ({ children, headerTitle }) => {
                                             Sair
                                         </Button>
                                         
-                                        <Button 
+                                        <Button
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
-                                            sx={{ 
+                                            sx={{
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
@@ -177,7 +191,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 color="inherit"
                                                 component={Link}
                                                 to={item.path}
-                                                sx={{ ...navButtonSx, display: { xs: 'inline-flex', md: 'inline-flex' } }}
+                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
                                                 variant={item.label === 'Registrar' ? 'outlined' : 'text'}
                                             >
                                                 {item.label}
@@ -191,7 +205,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {isAuthenticated && (
+            {isReallyLoggedIn && (
                 <Drawer
                     anchor="left"
                     open={drawerOpen}
