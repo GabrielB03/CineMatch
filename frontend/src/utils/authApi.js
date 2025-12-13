@@ -1,5 +1,16 @@
 const API_BASE_URL = "https://cinematch-api-mhxk.onrender.com";
 
+const getCookie = (name) => {
+  if (!document.cookie) return null;
+  const xsrfCookies = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .filter((c) => c.startsWith(name + "="));
+
+  if (xsrfCookies.length === 0) return null;
+  return xsrfCookies[0].split("=")[1];
+};
+
 export const removeToken = () => {
   fetch(`${API_BASE_URL}/auth/logout`, {
     method: "POST",
@@ -14,18 +25,13 @@ export const removeToken = () => {
 };
 
 export const getToken = () => {
-  return "DUMMY_TOKEN_CHECK";
-};
+  const accessToken = getCookie("access_token_cookie");
 
-const getCookie = (name) => {
-  if (!document.cookie) return null;
-  const xsrfCookies = document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .filter((c) => c.startsWith(name + "="));
+  if (accessToken) {
+    return "DUMMY_TOKEN_CHECK";
+  }
 
-  if (xsrfCookies.length === 0) return null;
-  return xsrfCookies[0].split("=")[1];
+  return null;
 };
 
 export const decodeToken = (token) => {
