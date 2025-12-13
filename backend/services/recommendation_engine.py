@@ -12,6 +12,7 @@ from utils.constants import GENRE_ID_TO_NAME, NotEnoughRatingsError
 import random
 from sqlalchemy import func
 
+
 class RecommendationEngine:
     def __init__(self, db):
         self.db = db
@@ -131,7 +132,6 @@ class RecommendationEngine:
         except Exception as e:
             if isinstance(e, NotEnoughRatingsError):
                 raise
-            print(f"❌ Erro na recomendação baseada em conteúdo: {e}")
             return []
 
     def content_based_tv_recommendations(self, user_id, top_n=10):
@@ -215,8 +215,6 @@ class RecommendationEngine:
         except Exception as e:
             if isinstance(e, NotEnoughRatingsError):
                 raise
-            print(
-                f"❌ Erro na recomendação baseada em conteúdo para séries: {e}")
             return []
 
     def collaborative_filtering_recommendations(self, user_id, top_n=10):
@@ -278,7 +276,6 @@ class RecommendationEngine:
             recommendations.sort(key=lambda x: x["score"], reverse=True)
             return recommendations
         except Exception as e:
-            print(f"❌ Erro na filtragem colaborativa: {e}")
             return []
 
     def collaborative_filtering_tv_recommendations(self, user_id, top_n=10):
@@ -334,13 +331,12 @@ class RecommendationEngine:
                         recommendations.append({
                             "tv_show": tv_show,
                             "score": float(predicted_rating),
-                            "reason": "Baseado em usuários com gostos similares"
+                            "reason": "Baseado no seu gosto por séries similares"
                         })
 
             recommendations.sort(key=lambda x: x["score"], reverse=True)
             return recommendations
         except Exception as e:
-            print(f"❌ Erro na filtragem colaborativa para séries: {e}")
             return []
 
     def hybrid_recommendations(self, user_id, top_n=10):
@@ -435,7 +431,6 @@ class RecommendationEngine:
             return self._load_movie_details(movies, total_count)
 
         except Exception as e:
-            print(f"❌ Erro ao buscar filmes populares {e}")
             return {"movies": [], "total_count": 0}
 
     def get_popular_tv_shows(self, top_n=10, offset=0):
@@ -450,7 +445,6 @@ class RecommendationEngine:
             return self._load_tv_show_details(tv_shows, total_count)
 
         except Exception as e:
-            print(f"❌ Erro ao buscar séries populares {e}")
             return {"tv_shows": [], "total_count": 0}
 
     def get_movies_by_genre(self, genre_id, top_n=10, offset=0):
@@ -471,7 +465,6 @@ class RecommendationEngine:
             return self._load_movie_details(movies, total_count)
 
         except Exception as e:
-            print(f"❌ Erro ao buscar filmes por gênero {genre_id}: {e}")
             return {"movies": [], "total_count": 0}
 
     def get_tv_shows_by_genre(self, genre_id, top_n=10, offset=0):
@@ -492,22 +485,29 @@ class RecommendationEngine:
             return self._load_tv_show_details(tv_shows, total_count)
 
         except Exception as e:
-            print(f"❌ Erro ao buscar séries por gênero {genre_id}: {e}")
             return {"tv_shows": [], "total_count": 0}
 
-    def _load_movie_details(self, movies, total_count):
+    def _load_movie_details(self, movies, total_count, user_id=None):
         for movie in movies:
-            rating = Rating.query.filter_by(
-                movie_id=movie.id).with_entities(Rating.rating).first()
-            movie.user_rating = rating[0] if rating else 0
-            movie.watch_providers = getattr(movie, 'watch_providers', None)
+            rating_query = Rating.query.filter_by(movie_id=movie.id)
+            if user_id:
+                rating_query = rating_query.filter_by(user_id=user_id)
+
+            rating = rating_query.with_entities(Rating.rating).first()
+
+            setattr(movie, 'user_rating', rating[0] if rating else 0)
+            setattr(movie, 'watch_providers', getattr(
+                movie, 'watch_providers', None))
 
         return {"movies": movies, "total_count": total_count}
 
-    def _load_tv_show_details(self, tv_shows, total_count):
+    def _load_tv_show_details(self, tv_shows, total_count, user_id=None):
         for tv_show in tv_shows:
-            rating = Rating.query.filter_by(
-                tv_show_id=tv_show.id).with_entities(Rating.rating).first()
-            tv_show.user_rating = rating[0] if rating else 0
+            rating_query = Rating.query.filter_by(tv_show_id=tv_show.id)
+            if user_id:
+                rating_query = rating_query.filter_by(user_id=user_id)
+
+            rating = rating_query.with_entities(Rating.rating).first()
+            setattr(tv_show, 'user_rating', rating[0] if rating else 0)
 
         return {"tv_shows": tv_shows, "total_count": total_count}

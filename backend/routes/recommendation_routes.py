@@ -10,6 +10,7 @@ from models.movie import Movie
 rec_bp = Blueprint("recommendations", __name__, url_prefix="/recommendations")
 engine = RecommendationEngine(db)
 
+
 def format_movie(movie):
     return {
         "id": movie.id,
@@ -17,10 +18,11 @@ def format_movie(movie):
         "title": movie.title,
         "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{movie.poster_path}" if movie.poster_path else None,
         "overview": movie.overview if movie.overview else None,
-        "user_rating": movie.user_rating if hasattr(movie, 'user_rating') else 0,
-        "watch_providers": movie.watch_providers if hasattr(movie, 'watch_providers') else None,
+        "user_rating": getattr(movie, 'user_rating', 0),
+        "watch_providers": getattr(movie, 'watch_providers', None),
         "type": "movie"
     }
+
 
 def format_tv_show(tv_show):
     return {
@@ -29,9 +31,10 @@ def format_tv_show(tv_show):
         "title": tv_show.title,
         "poster_path": f"{Config.TMDB_IMAGE_BASE_URL}{tv_show.poster_path}" if tv_show.poster_path else None,
         "overview": tv_show.overview if tv_show.overview else None,
-        "user_rating": tv_show.user_rating if hasattr(tv_show, 'user_rating') else 0,
+        "user_rating": getattr(tv_show, 'user_rating', 0),
         "type": "tv"
     }
+
 
 def format_rec(rec):
     movie = rec["movie"]
@@ -48,6 +51,7 @@ def format_rec(rec):
         },
     }
 
+
 def format_tv_rec(rec):
     tv_show = rec["tv_show"]
     return {
@@ -62,6 +66,7 @@ def format_tv_rec(rec):
             "type": "tv"
         },
     }
+
 
 @rec_bp.route("/", methods=["GET"])
 @rec_bp.route("", methods=["GET"])
@@ -91,12 +96,11 @@ def get_main_recommendations():
         return jsonify({"recommendations": [format_rec(r) for r in recs], "total_count": total_count}), 200
 
     except NotEnoughRatingsError as e:
-        print(f"⚠️ Usuário {user_id} sem avaliações suficientes: {e.message}")
         return jsonify({"message": e.message}), 422
 
     except Exception as e:
-        print(f"❌ Erro na recomendação: {e}")
         return jsonify({"message": f"Erro interno ao gerar recomendações: {e}"}), 500
+
 
 @rec_bp.route("/tv", methods=["GET"])
 @jwt_required()
@@ -125,12 +129,9 @@ def get_main_tv_recommendations():
         return jsonify({"recommendations": [format_tv_rec(r) for r in recs], "total_count": total_count}), 200
 
     except NotEnoughRatingsError as e:
-        print(
-            f"⚠️ Usuário {user_id} sem avaliações suficientes para Séries: {e.message}")
         return jsonify({"message": e.message}), 422
 
     except Exception as e:
-        print(f"❌ Erro na recomendação de Séries: {e}")
         return jsonify({"message": f"Erro interno ao gerar recomendações de Séries: {e}"}), 500
 
 
@@ -138,6 +139,11 @@ def get_main_tv_recommendations():
 def popular_movies():
     limit_str = request.args.get("limit", 30)
     page_str = request.args.get("page", 1)
+
+    try:
+        user_id = get_jwt_identity()
+    except:
+        user_id = None
 
     try:
         limit = int(limit_str)
@@ -148,7 +154,7 @@ def popular_movies():
 
     try:
         result = engine.get_popular_movies(
-            top_n=limit, offset=offset)
+            top_n=limit, offset=offset, user_id=user_id)
         movies = result["movies"]
         total_count = result["total_count"]
 
@@ -156,13 +162,18 @@ def popular_movies():
         return jsonify({"movies": formatted_movies, "total_count": total_count}), 200
 
     except Exception as e:
-        print(f"❌ Erro ao obter filmes populares: {e}")
         return jsonify({"message": f"Erro interno ao buscar filmes populares: {e}"}), 500
+
 
 @rec_bp.route("/tv/popular", methods=["GET"])
 def popular_tv_shows():
     limit_str = request.args.get("limit", 30)
     page_str = request.args.get("page", 1)
+
+    try:
+        user_id = get_jwt_identity()
+    except:
+        user_id = None
 
     try:
         limit = int(limit_str)
@@ -172,7 +183,7 @@ def popular_tv_shows():
 
     try:
         result = engine.get_popular_tv_shows(
-            top_n=limit, offset=(page-1)*limit)
+            top_n=limit, offset=(page-1)*limit, user_id=user_id)
         tv_shows = result["tv_shows"]
         total_count = result["total_count"]
 
@@ -181,14 +192,19 @@ def popular_tv_shows():
         return jsonify({"tv_shows": formatted_tv_shows, "total_count": total_count}), 200
 
     except Exception as e:
-        print(f"❌ Erro ao obter séries populares: {e}")
         return jsonify({"message": f"Erro interno ao buscar séries populares: {e}"}), 500
+
 
 @rec_bp.route("/genre", methods=["GET"])
 def get_recommendations_by_genre():
     genre_id_str = request.args.get("genre_id")
     limit_str = request.args.get("limit", 30)
     page_str = request.args.get("page", 1)
+
+    try:
+        user_id = get_jwt_identity()
+    except:
+        user_id = None
 
     try:
         limit = int(limit_str)
@@ -203,7 +219,7 @@ def get_recommendations_by_genre():
 
     try:
         result = engine.get_movies_by_genre(
-            genre_id, top_n=limit, offset=offset)
+            genre_id, top_n=limit, offset=offset, user_id=user_id)
 
         movies = result["movies"]
         total_count = result["total_count"]
@@ -213,14 +229,19 @@ def get_recommendations_by_genre():
         return jsonify({"movies": formatted_movies, "total_count": total_count}), 200
 
     except Exception as e:
-        print(f"❌ Erro ao buscar filmes por Gênero: {e}")
         return jsonify({"message": f"Erro interno ao buscar filmes por Gênero: {e}"}), 500
+
 
 @rec_bp.route("/tv/genre", methods=["GET"])
 def get_tv_recommendations_by_genre():
     genre_id_str = request.args.get("genre_id")
     limit_str = request.args.get("limit", 30)
     page_str = request.args.get("page", 1)
+
+    try:
+        user_id = get_jwt_identity()
+    except:
+        user_id = None
 
     try:
         limit = int(limit_str)
@@ -235,7 +256,7 @@ def get_tv_recommendations_by_genre():
 
     try:
         result = engine.get_tv_shows_by_genre(
-            genre_id, top_n=limit, offset=offset)
+            genre_id, top_n=limit, offset=offset, user_id=user_id)
 
         tv_shows = result["tv_shows"]
         total_count = result["total_count"]
@@ -245,5 +266,4 @@ def get_tv_recommendations_by_genre():
         return jsonify({"tv_shows": formatted_tv_shows, "total_count": total_count}), 200
 
     except Exception as e:
-        print(f"❌ Erro ao buscar Séries por Gênero: {e}")
         return jsonify({"message": f"Erro interno ao buscar Séries por Gênero: {e}"}), 500
