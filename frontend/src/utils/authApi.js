@@ -1,16 +1,5 @@
 const API_BASE_URL = "https://cinematch-api-mhxk.onrender.com";
 
-const getCookie = (name) => {
-  if (!document.cookie) return null;
-  const xsrfCookies = document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .filter((c) => c.startsWith(name + "="));
-
-  if (xsrfCookies.length === 0) return null;
-  return xsrfCookies[0].split("=")[1];
-};
-
 export const removeToken = () => {
   fetch(`${API_BASE_URL}/auth/logout`, {
     method: "POST",
@@ -25,16 +14,18 @@ export const removeToken = () => {
 };
 
 export const getToken = () => {
-  // A correção: Checa se o cookie de acesso (padrão Flask-JWT-Extended) existe.
-  const accessTokenCookie = getCookie("access_token_cookie");
+  return "DUMMY_TOKEN_CHECK";
+};
 
-  // Retorna o DUMMY token SOMENTE se o cookie de sessão estiver ativo (usuário logado).
-  if (accessTokenCookie) {
-    return "DUMMY_TOKEN_CHECK";
-  }
+const getCookie = (name) => {
+  if (!document.cookie) return null;
+  const xsrfCookies = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .filter((c) => c.startsWith(name + "="));
 
-  // Se o usuário não está logado, retorna null, resolvendo o problema do botão SAIR.
-  return null;
+  if (xsrfCookies.length === 0) return null;
+  return xsrfCookies[0].split("=")[1];
 };
 
 export const decodeToken = (token) => {
@@ -70,7 +61,7 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
 
   if (mergedOptions.method !== "GET") {
     const csrfToken = getCookie("csrf_access_token");
-
+    
     if (csrfToken) {
       mergedOptions.headers["X-CSRF-TOKEN"] = csrfToken;
     }
@@ -89,26 +80,11 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
 
   if (!response.ok) {
     let errorMessage = response.statusText;
-    let errorData = null;
-
-    // Tratamento robusto para evitar o SyntaxError: JSON.parse
     try {
-      errorData = await response.json();
+      const errorData = await response.json();
       errorMessage = errorData.message || errorData.error || errorMessage;
     } catch (e) {
-      try {
-        const textError = await response.text();
-        console.error(
-          "Erro no JSON. Conteúdo do corpo:",
-          textError.substring(0, 200) + "..."
-        );
-        errorMessage = `Erro ${response.status}: Resposta não é JSON (Erro interno no servidor).`;
-      } catch (textReadError) {
-        console.error(
-          "Falha ao tentar ler a resposta como texto:",
-          textReadError
-        );
-      }
+      console.error("Não foi possível ler o corpo do erro como JSON:", e);
     }
 
     throw new Error(`${response.status}: ${errorMessage}`);

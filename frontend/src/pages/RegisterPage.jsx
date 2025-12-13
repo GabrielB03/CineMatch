@@ -11,14 +11,12 @@ const RegisterPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState(null);
-    const [isSuccess, setIsSuccess] = useState(false);
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(null);
-        setIsSuccess(false);
 
         if (!username || !email || !password) {
             setMessage("Por favor, preencha todos os campos.");
@@ -36,33 +34,31 @@ const RegisterPage = () => {
 
             if (res.ok) {
                 setMessage(data.message || "Registro concluído com sucesso!");
-                setIsSuccess(true);
                 setTimeout(() => {
                     navigate('/login');
                 }, 2000);
             } else {
-                setMessage(data.message || "Erro ao registrar. Verifique os dados e tente novamente.");
-                setIsSuccess(false);
+                setMessage(data.message || "Erro ao registrar. Tente novamente.");
             }
-        } catch (error) {
-            console.error("Erro na comunicação com a API:", error);
-            setMessage("Falha na conexão com o servidor. Tente novamente.");
-            setIsSuccess(false);
+        } catch (err) {
+            setMessage("Erro de conexão. Verifique se o backend está rodando e se a rota /api/auth/register está acessível.");
         }
     };
 
+    const isSuccess = message && message.includes('sucesso');
+
     return (
-        <Layout headerTitle="Registrar">
+        <Layout headerTitle="Registro">
             <Box sx={{ maxWidth: 400, margin: '50px auto' }}>
-                <Paper elevation={3} sx={{ padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <PersonAddIcon color="success" sx={{ fontSize: 40, mb: 1 }} />
-                    <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-                        Criar Nova Conta
+                <Paper elevation={3} sx={{ padding: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Typography variant="h5" align="center" gutterBottom>
+                        Crie sua conta
                     </Typography>
-                    
-                    <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
                         <TextField
-                            label="Nome de Usuário"
+                            label="Nome de usuário"
                             type="text"
                             variant="outlined"
                             fullWidth
@@ -70,7 +66,7 @@ const RegisterPage = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-                        
+
                         <TextField
                             label="E-mail"
                             type="email"

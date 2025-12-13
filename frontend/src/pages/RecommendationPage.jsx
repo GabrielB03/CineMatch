@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import StarRating from '../components/StarRating';
 import { fetchWithAuth, removeToken, getToken } from '../utils/authApi';
-import { CircularProgress, Button, Box, Pagination, Snackbar, Alert, Typography } from '@mui/material';
+import { CircularProgress, Button, Box, Pagination, Snackbar, Alert } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
@@ -19,7 +19,6 @@ const RecommendationPage = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -31,10 +30,6 @@ const RecommendationPage = () => {
     const [pageTitle, setPageTitle] = useState("Recomendações");
     const [currentFetcher, setCurrentFetcher] = useState(null);
     const [currentEndpoint, setCurrentEndpoint] = useState(null);
-
-    useEffect(() => {
-        setIsAuthenticated(!!getToken());
-    }, []);
     
     const executeFetch = useCallback(async (endpoint, fetcher, currentPage) => {
         let response;
@@ -114,8 +109,6 @@ const RecommendationPage = () => {
             setError(null);
             
             const token = getToken();
-            setIsAuthenticated(!!token);
-            
             let endpoint = "";
             let fetcher = fetch;
             const isMovie = contentTypeFromUrl === 'movie';
@@ -207,10 +200,9 @@ const RecommendationPage = () => {
     };
     
     const handleAddToWishlist = async (tmdbId) => {
-        if (!isAuthenticated) {
+        if (!getToken()) {
             setSnackbarMessage("Faça login para adicionar conteúdo à sua Wishlist.");
             setSnackbarOpen(true);
-            setTimeout(() => navigate('/login'), 2000);
             return;
         }
         try {
@@ -306,6 +298,8 @@ const RecommendationPage = () => {
             <h2 style={{ marginBottom: '20px' }}>Resultados ({totalCount} itens)</h2>
             <div className="card-grid" id="recommendationsList">
                 {movies.map((movie) => {
+                    const showRating = !!getToken();
+                    
                     return (
                         <div className="movie-card" key={movie.tmdb_id}>
                             <img 
@@ -317,11 +311,13 @@ const RecommendationPage = () => {
                             <p className="plot">{movie.overview || "Nenhuma descrição disponível."}</p>
                             
                             <div className="rating-area">
-                                <StarRating 
-                                    tmdbId={movie.tmdb_id} 
-                                    initialRating={movie.user_rating || 0} 
-                                    contentType={contentTypeFromUrl}
-                                />
+                                {showRating && (
+                                    <StarRating 
+                                        tmdbId={movie.tmdb_id} 
+                                        initialRating={movie.user_rating || 0} 
+                                        contentType={contentTypeFromUrl}
+                                    />
+                                )}
                                 <Button 
                                     variant="contained" 
                                     color="secondary" 

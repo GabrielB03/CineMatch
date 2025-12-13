@@ -141,15 +141,34 @@ const Layout = ({ children, headerTitle }) => {
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
-                                            startIcon={<ExitToAppIcon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} />}
+                                            startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
                                             sx={{ 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
+                                                // Torna o botão Sair visível no mobile e desktop
+                                                display: { xs: 'block', md: 'block' },
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                                 }
+                                            }}
+                                        >
+                                            <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>Sair</Box>
+                                        </Button>
+
+                                        {/* Botão SAIR mobile (apenas texto) */}
+                                        <Button 
+                                            onClick={handleLogout}
+                                            variant="outlined"
+                                            color="secondary"
+                                            size="small"
+                                            sx={{ 
+                                                ml: 1, 
+                                                borderColor: 'primary.contrastText',
+                                                fontSize: '0.8rem',
+                                                padding: '4px 8px',
+                                                display: { xs: 'block', md: 'none' } 
                                             }}
                                         >
                                             Sair
@@ -169,21 +188,6 @@ const Layout = ({ children, headerTitle }) => {
                                                 {item.label}
                                             </Button>
                                         ))}
-                                        
-                                        <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
-                                            {unauthenticatedNavItems.map(item => (
-                                                <Button
-                                                    key={item.path}
-                                                    color="inherit"
-                                                    component={Link}
-                                                    to={item.path}
-                                                    sx={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                                                    variant={item.label === 'Registrar' ? 'outlined' : 'text'}
-                                                >
-                                                    {item.label}
-                                                </Button>
-                                            ))}
-                                        </Box>
                                     </>
                                 )}
                             </Box>

@@ -36,24 +36,23 @@ const LoginPage = () => {
                 console.log("Login realizado com sucesso!");
                 navigate('/recommendations');
             } else {
-                setErrorMessage(data.message || "Erro ao realizar login. Verifique suas credenciais.");
+                setErrorMessage(data.message || "Erro ao fazer login. Verifique suas credenciais.");
             }
-        } catch (error) {
-            console.error("Erro na comunicação com a API:", error);
-            setErrorMessage("Falha na conexão com o servidor. Tente novamente.");
+        } catch (err) {
+            console.error("Erro no login:", err);
+            setErrorMessage("Erro de conexão ou JSON inválido. Verifique o console do navegador e se o backend está ativo.");
         }
     };
 
     return (
         <Layout headerTitle="Login">
             <Box sx={{ maxWidth: 400, margin: '50px auto' }}>
-                <Paper elevation={3} sx={{ padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <LockOpenIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-                    <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-                        Acessar Conta
+                <Paper elevation={3} sx={{ padding: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Typography variant="h5" align="center" gutterBottom>
+                        Acesse sua conta
                     </Typography>
-                    
-                    <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                         <TextField
                             label="E-mail"
