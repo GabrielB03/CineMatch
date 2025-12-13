@@ -10,11 +10,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
     const isAuthenticated = !!getToken();
-    
-    console.log('🔍 isAuthenticated:', isAuthenticated);
-    console.log('🍪 Token:', getToken());
-    console.log('🍪 Cookies:', document.cookie);
-    
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -37,17 +32,17 @@ const Layout = ({ children, headerTitle }) => {
     };
 
     const navItems = [
-        { label: 'Recomendações', path: '/recommendations' },
-        { label: 'Wishlist', path: '/wishlist', icon: FavoriteBorderIcon },
-        { label: 'Minhas Notas', path: '/my-ratings' },
-        { label: 'Comunidade', path: '/users' },
-        { label: 'Gêneros', path: '/genres' },
-        { label: 'CONTA', path: '/account' },
+        { label: 'Recomendações', path: '/recommendations', isAuthenticated: true },
+        { label: 'Wishlist', path: '/wishlist', isAuthenticated: true, icon: FavoriteBorderIcon },
+        { label: 'Minhas Notas', path: '/my-ratings', isAuthenticated: true },
+        { label: 'Comunidade', path: '/users', isAuthenticated: true },
+        { label: 'Gêneros', path: '/genres', isAuthenticated: true },
+        { label: 'CONTA', path: '/account', isAuthenticated: true },
     ];
 
     const unauthenticatedNavItems = [
-        { label: 'Login', path: '/login' },
-        { label: 'Registrar', path: '/register' },
+        { label: 'Login', path: '/login', isAuthenticated: false },
+        { label: 'Registrar', path: '/register', isAuthenticated: false },
     ];
 
     const drawerList = (
@@ -58,7 +53,7 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {isAuthenticated && navItems.map((item) => (
+                {(isAuthenticated ? navItems : unauthenticatedNavItems).filter(item => item.isAuthenticated === isAuthenticated).map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -72,13 +67,6 @@ const Layout = ({ children, headerTitle }) => {
                         </ListItemButton>
                     </ListItem>
                 )}
-                {!isAuthenticated && unauthenticatedNavItems.map((item) => (
-                    <ListItem key={item.label} disablePadding>
-                        <ListItemButton component={Link} to={item.path}>
-                            <ListItemText primary={item.label} />
-                        </ListItemButton>
-                    </ListItem>
-                ))}
             </List>
         </Box>
     );
@@ -142,7 +130,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 component={Link}
                                                 to={item.path}
                                                 sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
-                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem' }} /> : null}
+                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
                                             >
                                                 {item.label}
                                             </Button>
@@ -153,31 +141,15 @@ const Layout = ({ children, headerTitle }) => {
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
-                                            startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
+                                            startIcon={<ExitToAppIcon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} />}
                                             sx={{ 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'none', md: 'inline-flex' },
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                                 }
-                                            }}
-                                        >
-                                            Sair
-                                        </Button>
-
-                                        <Button 
-                                            onClick={handleLogout}
-                                            variant="outlined"
-                                            color="secondary"
-                                            size="small"
-                                            sx={{ 
-                                                borderColor: 'primary.contrastText',
-                                                fontSize: '0.8rem',
-                                                padding: '4px 8px',
-                                                display: { xs: 'inline-flex', md: 'none' } 
                                             }}
                                         >
                                             Sair
@@ -197,21 +169,21 @@ const Layout = ({ children, headerTitle }) => {
                                                 {item.label}
                                             </Button>
                                         ))}
-                                        {unauthenticatedNavItems.map(item => (
-                                            <Button
-                                                key={item.path + '-mobile'}
-                                                color="inherit"
-                                                component={Link}
-                                                to={item.path}
-                                                sx={{
-                                                    ...navButtonSx,
-                                                    display: { xs: 'inline-flex', md: 'none' }
-                                                }}
-                                                variant={item.label === 'Registrar' ? 'outlined' : 'text'}
-                                            >
-                                                {item.label}
-                                            </Button>
-                                        ))}
+                                        
+                                        <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
+                                            {unauthenticatedNavItems.map(item => (
+                                                <Button
+                                                    key={item.path}
+                                                    color="inherit"
+                                                    component={Link}
+                                                    to={item.path}
+                                                    sx={{ fontSize: '0.8rem', padding: '4px 8px' }}
+                                                    variant={item.label === 'Registrar' ? 'outlined' : 'text'}
+                                                >
+                                                    {item.label}
+                                                </Button>
+                                            ))}
+                                        </Box>
                                     </>
                                 )}
                             </Box>
