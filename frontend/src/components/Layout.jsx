@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CineMatchLogo from '../assets/cinematch.png';
-import { getToken, removeToken } from '../utils/authApi';
+// Importa isTokenPresent para checagem real do login/logout
+import { removeToken, isTokenPresent } from '../utils/authApi'; 
 import ThemeSwitch from './ThemeSwitch';
 import { AppBar, Toolbar, Button, Typography, Box, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -9,7 +10,10 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    const isAuthenticated = !!getToken();
+    const isAuthenticated = true; 
+    
+    const isReallyLoggedIn = isTokenPresent();
+
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -53,21 +57,21 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {isAuthenticated && navItems.map((item) => (
+                {isReallyLoggedIn && navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {isAuthenticated && (
+                {isReallyLoggedIn && (
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
                             <ListItemText primary="Sair" />
                         </ListItemButton>
                     </ListItem>
                 )}
-                {!isAuthenticated && unauthenticatedNavItems.map((item) => (
+                {!isReallyLoggedIn && unauthenticatedNavItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -85,14 +89,14 @@ const Layout = ({ children, headerTitle }) => {
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
-                        {isAuthenticated && (
+                        {isReallyLoggedIn && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                                 <IconButton
                                     color="inherit"
                                     aria-label="open drawer"
                                     edge="start"
                                     onClick={toggleDrawer(true)}
-                                    sx={{ mr: 1 }}
+                                    sx={{ mr: 1 }} 
                                 >
                                     <MenuIcon />
                                 </IconButton>
@@ -127,7 +131,7 @@ const Layout = ({ children, headerTitle }) => {
                         <ThemeSwitch />
                         
                         <nav>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Box sx={{ display: 'flex', gap: 1 }}> 
                                 {navItems.map(item => (
                                     <Button
                                         key={item.path}
@@ -141,7 +145,7 @@ const Layout = ({ children, headerTitle }) => {
                                     </Button>
                                 ))}
 
-                                {isAuthenticated ? (
+                                {isReallyLoggedIn ? (
                                     <>
                                         <Button
                                             onClick={handleLogout}
@@ -200,7 +204,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {isAuthenticated && (
+            {isReallyLoggedIn && (
                 <Drawer
                     anchor="left"
                     open={drawerOpen}
