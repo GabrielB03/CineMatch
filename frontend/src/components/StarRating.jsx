@@ -4,7 +4,7 @@ import { fetchWithAuth, getToken } from '../utils/authApi';
 import { Alert, Box, Rating } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
-import { Typography } from '@mui/material';
+import { Typography, Button } from '@mui/material';
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL || 'https://cinematch-api-mhxk.onrender.com';
 
@@ -30,13 +30,13 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
         }
 
         const ratingData = {
+            tmdb_id: tmdbId,
             rating: rating * 2,
+            content_type: contentType
         };
 
         try {
-            const endpoint = `/ratings/${contentType}/${tmdbId}/rate`;
-            
-            const response = await fetchWithAuth(endpoint, {
+            const response = await fetchWithAuth('/ratings', {
                 method: "POST",
                 body: JSON.stringify(ratingData),
             });
@@ -75,22 +75,47 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
             setTimeout(() => setFeedback(null), 5000);
         }
     };
+    
+    const handleRemoveRating = async () => {
+        setFeedback(null);
+        setIsSaving(true);
+        
+        try {
+            const response = await fetchWithAuth(`/ratings/${tmdbId}?content_type=${contentType}`, {
+                method: 'DELETE',
+            });
+            
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || "Falha ao remover a avaliação.");
+            }
+            
+            setSavedRating(0);
+            setFeedback({ message: "Avaliação removida com sucesso!", type: 'success' });
+            
+        } catch (error) {
+            setFeedback({ message: `Erro ao remover avaliação: ${error.message}`, type: 'error' });
+        } finally {
+            setIsSaving(false);
+            setTimeout(() => setFeedback(null), 5000);
+        }
+    };
 
     return (
         <Box className="star-rating" sx={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
             
             {feedback && (
-                <Alert 
-                    severity={feedback.type} 
-                    sx={{ 
-                        position: 'absolute', 
-                        top: '-50px', 
-                        left: '50%', 
-                        transform: 'translateX(-50%)', 
+                <Alert
+                    severity={feedback.type}
+                    sx={{
+                        position: 'absolute',
+                        top: '-50px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
                         zIndex: 1000,
                         maxWidth: 300,
                         whiteSpace: 'nowrap',
-                        p: 0.5 
+                        p: 0.5
                     }}
                 >
                     {feedback.message}
@@ -124,11 +149,24 @@ const StarRating = ({ tmdbId, initialRating = 0, contentType = 'movie' }) => {
             </Box>
             {isSaving && <Typography variant="caption" color="primary">Salvando...</Typography>}
             
-            {savedRating > 0 && !isSaving && (
-                <Typography variant="caption" color="text.secondary">
-                    ({savedRating * 2}/10)
-                </Typography>
-            )}
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                {savedRating > 0 && !isSaving && (
+                    <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+                        ({savedRating * 2}/10)
+                    </Typography>
+                )}
+                {savedRating > 0 && !isSaving && (
+                    <Button
+                        onClick={handleRemoveRating}
+                        variant="text"
+                        color="error"
+                        size="small"
+                        sx={{ fontSize: '0.7rem', padding: '0 4px', minWidth: 'auto' }}
+                    >
+                        REMOVER
+                    </Button>
+                )}
+            </Box>
         </Box>
     );
 };

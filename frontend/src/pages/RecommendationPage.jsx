@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import StarRating from '../components/StarRating';
 import { fetchWithAuth, removeToken, getToken } from '../utils/authApi';
-import { CircularProgress, Button, Box, Pagination, Snackbar, Alert } from '@mui/material';
+import { CircularProgress, Button, Box, Pagination, Snackbar, Alert, Typography } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';

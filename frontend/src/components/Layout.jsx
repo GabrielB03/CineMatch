@@ -9,7 +9,8 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    const isAuthenticated = !!getToken();
+    const isReallyLoggedIn = !!getToken(); 
+    const isAuthenticated = true;
 
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -54,21 +55,21 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {isAuthenticated && navItems.map((item) => (
+                {isReallyLoggedIn && navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {isAuthenticated && (
+                {isReallyLoggedIn && (
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
                             <ListItemText primary="Sair" />
                         </ListItemButton>
                     </ListItem>
                 )}
-                {!isAuthenticated && unauthenticatedNavItems.map((item) => (
+                {!isReallyLoggedIn && unauthenticatedNavItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -86,7 +87,7 @@ const Layout = ({ children, headerTitle }) => {
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
-                        {isAuthenticated && (
+                        {isReallyLoggedIn && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                                 <IconButton
                                     color="inherit"
@@ -130,21 +131,21 @@ const Layout = ({ children, headerTitle }) => {
                         <nav>
                             <Box sx={{ display: 'flex', gap: 1 }}> 
                                 
-                                {isAuthenticated ? (
-                                    <>
-                                        {navItems.map(item => (
-                                            <Button
-                                                key={item.path}
-                                                color="inherit"
-                                                component={Link}
-                                                to={item.path}
-                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
-                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
-                                            >
-                                                {item.label}
-                                            </Button>
-                                        ))}
+                                {navItems.map(item => (
+                                    <Button
+                                        key={item.path}
+                                        color="inherit"
+                                        component={Link}
+                                        to={item.path}
+                                        sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
+                                        startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
+                                    >
+                                        {item.label}
+                                    </Button>
+                                ))}
 
+                                {isReallyLoggedIn ? (
+                                    <>
                                         <Button
                                             onClick={handleLogout}
                                             variant="outlined"
@@ -217,7 +218,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {isAuthenticated && (
+            {isReallyLoggedIn && (
                 <Drawer
                     anchor="left"
                     open={drawerOpen}
