@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CineMatchLogo from '../assets/cinematch.png';
-// Importa isTokenPresent para checagem real do login/logout
+// A partir de agora, é isTokenPresent que deve ser usado para a lógica Sair/Login/Registrar
 import { removeToken, isTokenPresent } from '../utils/authApi'; 
 import ThemeSwitch from './ThemeSwitch';
 import { AppBar, Toolbar, Button, Typography, Box, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
@@ -12,7 +12,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 const Layout = ({ children, headerTitle }) => {
     const isAuthenticated = true; 
     
-    const isReallyLoggedIn = isTokenPresent();
+    const isReallyLoggedIn = isTokenPresent(); 
 
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -96,7 +96,7 @@ const Layout = ({ children, headerTitle }) => {
                                     aria-label="open drawer"
                                     edge="start"
                                     onClick={toggleDrawer(true)}
-                                    sx={{ mr: 1 }} 
+                                    sx={{ mr: 1 }}
                                 >
                                     <MenuIcon />
                                 </IconButton>
@@ -131,7 +131,7 @@ const Layout = ({ children, headerTitle }) => {
                         <ThemeSwitch />
                         
                         <nav>
-                            <Box sx={{ display: 'flex', gap: 1 }}> 
+                            <Box sx={{ display: 'flex', gap: 1 }}>
                                 {navItems.map(item => (
                                     <Button
                                         key={item.path}
@@ -147,17 +147,17 @@ const Layout = ({ children, headerTitle }) => {
 
                                 {isReallyLoggedIn ? (
                                     <>
-                                        <Button
+                                        <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                            sx={{
+                                            sx={{ 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'none', md: 'block' },
+                                                display: { xs: 'none', md: 'inline-flex' },
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -176,7 +176,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'block', md: 'none' }
+                                                display: { xs: 'inline-flex', md: 'none' }
                                             }}
                                         >
                                             Sair
@@ -192,6 +192,21 @@ const Layout = ({ children, headerTitle }) => {
                                                 to={item.path}
                                                 sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
                                                 variant={item.label === 'Registrar' ? 'outlined' : 'text'}
+                                            >
+                                                {item.label}
+                                            </Button>
+                                        ))}
+                                        {unauthenticatedNavItems.map(item => (
+                                            <Button
+                                                key={item.path + '-mobile'}
+                                                color="inherit"
+                                                component={Link}
+                                                to={item.path}
+                                                sx={{
+                                                    ...navButtonSx,
+                                                    display: { xs: 'inline-flex', md: 'none' },
+                                                    variant: item.label === 'Registrar' ? 'outlined' : 'text'
+                                                }}
                                             >
                                                 {item.label}
                                             </Button>
