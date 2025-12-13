@@ -24,19 +24,12 @@ export const removeToken = () => {
     });
 };
 
-export const isTokenPresent = () => {
-  return !!getCookie("csrf_access_token");
-};
-
 export const getToken = () => {
-  const realToken = getCookie("csrf_access_token");
-  if (realToken) return realToken;
-
-  return "DUMMY_TOKEN_CHECK";
+  return getCookie("csrf_access_token");
 };
 
 export const decodeToken = (token) => {
-  if (!token || token === "DUMMY_TOKEN_CHECK") return null;
+  if (!token || token.length < 10) return null;
 
   try {
     const base64Url = token.split(".")[1];

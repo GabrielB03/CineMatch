@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CineMatchLogo from '../assets/cinematch.png';
-// A partir de agora, é isTokenPresent que deve ser usado para a lógica Sair/Login/Registrar
-import { removeToken, isTokenPresent } from '../utils/authApi'; 
+import { getToken, removeToken } from '../utils/authApi';
 import ThemeSwitch from './ThemeSwitch';
 import { AppBar, Toolbar, Button, Typography, Box, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -10,9 +9,9 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    const isAuthenticated = true; 
+    const isAuthenticated = true;
     
-    const isReallyLoggedIn = isTokenPresent(); 
+    const isReallyLoggedIn = !!getToken();
 
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -85,7 +84,7 @@ const Layout = ({ children, headerTitle }) => {
     return (
         <div className="app-wrapper">
             <AppBar position="static" color="primary">
-                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 }, paddingLeft: { xs: 1, sm: 2 } }}> 
+                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 }, paddingLeft: { xs: 1, sm: 2 } }}>
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
@@ -96,7 +95,7 @@ const Layout = ({ children, headerTitle }) => {
                                     aria-label="open drawer"
                                     edge="start"
                                     onClick={toggleDrawer(true)}
-                                    sx={{ mr: 1 }}
+                                    sx={{ mr: 1 }} 
                                 >
                                     <MenuIcon />
                                 </IconButton>
@@ -147,17 +146,17 @@ const Layout = ({ children, headerTitle }) => {
 
                                 {isReallyLoggedIn ? (
                                     <>
-                                        <Button 
+                                        <Button
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                            sx={{ 
+                                            sx={{
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'none', md: 'inline-flex' },
+                                                display: { xs: 'none', md: 'inline-flex' }, 
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
