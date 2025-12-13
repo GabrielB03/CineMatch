@@ -9,9 +9,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    const isAuthenticated = true;
-    
-    const isReallyLoggedIn = !!getToken();
+    const isAuthenticated = !!getToken();
 
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -56,21 +54,21 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {isReallyLoggedIn && navItems.map((item) => (
+                {isAuthenticated && navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {isReallyLoggedIn && (
+                {isAuthenticated && (
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
                             <ListItemText primary="Sair" />
                         </ListItemButton>
                     </ListItem>
                 )}
-                {!isReallyLoggedIn && unauthenticatedNavItems.map((item) => (
+                {!isAuthenticated && unauthenticatedNavItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -84,18 +82,18 @@ const Layout = ({ children, headerTitle }) => {
     return (
         <div className="app-wrapper">
             <AppBar position="static" color="primary">
-                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 }, paddingLeft: { xs: 1, sm: 2 } }}>
+                <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 }, paddingLeft: { xs: 1, sm: 2 } }}> 
                     
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         
-                        {isReallyLoggedIn && (
+                        {isAuthenticated && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                                 <IconButton
                                     color="inherit"
                                     aria-label="open drawer"
                                     edge="start"
                                     onClick={toggleDrawer(true)}
-                                    sx={{ mr: 1 }} 
+                                    sx={{ mr: 1 }}
                                 >
                                     <MenuIcon />
                                 </IconButton>
@@ -130,22 +128,23 @@ const Layout = ({ children, headerTitle }) => {
                         <ThemeSwitch />
                         
                         <nav>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                                {navItems.map(item => (
-                                    <Button
-                                        key={item.path}
-                                        color="inherit"
-                                        component={Link}
-                                        to={item.path}
-                                        sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
-                                        startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
-                                    >
-                                        {item.label}
-                                    </Button>
-                                ))}
-
-                                {isReallyLoggedIn ? (
+                            <Box sx={{ display: 'flex', gap: 1 }}> 
+                                
+                                {isAuthenticated ? (
                                     <>
+                                        {navItems.map(item => (
+                                            <Button
+                                                key={item.path}
+                                                color="inherit"
+                                                component={Link}
+                                                to={item.path}
+                                                sx={{ ...navButtonSx, display: { xs: 'none', md: 'inline-flex' } }}
+                                                startIcon={item.icon ? <item.icon sx={{ fontSize: '1rem', display: { xs: 'none', md: 'inline-block' } }} /> : null}
+                                            >
+                                                {item.label}
+                                            </Button>
+                                        ))}
+
                                         <Button
                                             onClick={handleLogout}
                                             variant="outlined"
@@ -156,7 +155,7 @@ const Layout = ({ children, headerTitle }) => {
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'none', md: 'inline-flex' }, 
+                                                display: { xs: 'none', md: 'inline-flex' },
                                                 '&:hover': {
                                                     borderColor: 'secondary.main',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -218,7 +217,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {isReallyLoggedIn && (
+            {isAuthenticated && (
                 <Drawer
                     anchor="left"
                     open={drawerOpen}
