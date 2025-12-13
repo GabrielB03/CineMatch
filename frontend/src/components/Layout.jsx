@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CineMatchLogo from '../assets/cinematch.png';
-import { getToken, removeToken } from '../utils/authApi';
+import { isAuthenticated, removeToken } from '../utils/authApi';
 import ThemeSwitch from './ThemeSwitch';
 import { AppBar, Toolbar, Button, Typography, Box, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -9,8 +9,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Layout = ({ children, headerTitle }) => {
-    const isAuthenticated = !!getToken(); // Única variável de autenticação
-
+    const isLoggedIn = isAuthenticated();
     const navigate = useNavigate();
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -54,21 +53,21 @@ const Layout = ({ children, headerTitle }) => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {isAuthenticated && navItems.map((item) => (
+                {isLoggedIn && navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {isAuthenticated && (
+                {isLoggedIn && (
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
                             <ListItemText primary="Sair" />
                         </ListItemButton>
                     </ListItem>
                 )}
-                {!isAuthenticated && unauthenticatedNavItems.map((item) => (
+                {!isLoggedIn && unauthenticatedNavItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton component={Link} to={item.path}>
                             <ListItemText primary={item.label} />
@@ -84,16 +83,16 @@ const Layout = ({ children, headerTitle }) => {
             <AppBar position="static" color="primary">
                 <Toolbar sx={{ color: 'primary.contrastText', minHeight: 60, paddingRight: { xs: 1, sm: 2 }, paddingLeft: { xs: 1, sm: 2 } }}> 
                     
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
                         
-                        {isAuthenticated && (
+                        {isLoggedIn && (
                             <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
                                 <IconButton
                                     color="inherit"
                                     aria-label="open drawer"
                                     edge="start"
                                     onClick={toggleDrawer(true)}
-                                    sx={{ mr: 1 }}
+                                    sx={{ mr: 1 }} 
                                 >
                                     <MenuIcon />
                                 </IconButton>
@@ -124,16 +123,13 @@ const Layout = ({ children, headerTitle }) => {
                         )}
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 'auto', gap: { xs: 1, md: 2 } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
                         <ThemeSwitch />
                         
                         <nav>
                             <Box sx={{ display: 'flex', gap: 1 }}> 
-                                
-                                {/* Navegação para usuários autenticados */}
-                                {isAuthenticated && (
+                                {isLoggedIn ? (
                                     <>
-                                        {/* Menu desktop */}
                                         {navItems.map(item => (
                                             <Button
                                                 key={item.path}
@@ -146,15 +142,14 @@ const Layout = ({ children, headerTitle }) => {
                                                 {item.label}
                                             </Button>
                                         ))}
-
-                                        {/* Botão Sair - Desktop */}
-                                        <Button
+                                        
+                                        <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
                                             startIcon={<ExitToAppIcon sx={{ fontSize: '1rem' }} />}
-                                            sx={{
+                                            sx={{ 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
@@ -167,29 +162,24 @@ const Layout = ({ children, headerTitle }) => {
                                         >
                                             Sair
                                         </Button>
-                                        
-                                        {/* Botão Sair - Mobile */}
-                                        <Button
+
+                                        <Button 
                                             onClick={handleLogout}
                                             variant="outlined"
                                             color="secondary"
                                             size="small"
-                                            sx={{
+                                            sx={{ 
                                                 borderColor: 'primary.contrastText',
                                                 fontSize: '0.8rem',
                                                 padding: '4px 8px',
-                                                display: { xs: 'inline-flex', md: 'none' }
+                                                display: { xs: 'inline-flex', md: 'none' } 
                                             }}
                                         >
                                             Sair
                                         </Button>
                                     </>
-                                )}
-
-                                {/* Navegação para usuários não autenticados */}
-                                {!isAuthenticated && (
+                                ) : (
                                     <>
-                                        {/* Desktop */}
                                         {unauthenticatedNavItems.map(item => (
                                             <Button
                                                 key={item.path}
@@ -202,7 +192,6 @@ const Layout = ({ children, headerTitle }) => {
                                                 {item.label}
                                             </Button>
                                         ))}
-                                        {/* Mobile */}
                                         {unauthenticatedNavItems.map(item => (
                                             <Button
                                                 key={item.path + '-mobile'}
@@ -226,7 +215,7 @@ const Layout = ({ children, headerTitle }) => {
                 </Toolbar>
             </AppBar>
             
-            {isAuthenticated && (
+            {isLoggedIn && (
                 <Drawer
                     anchor="left"
                     open={drawerOpen}

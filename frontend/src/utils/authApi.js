@@ -25,11 +25,19 @@ export const removeToken = () => {
 };
 
 export const getToken = () => {
-  return getCookie("csrf_access_token");
+  const actualToken = getCookie("csrf_access_token");
+  if (actualToken) {
+    return actualToken;
+  }
+  return null;
+};
+
+export const isAuthenticated = () => {
+  return !!getCookie("csrf_access_token");
 };
 
 export const decodeToken = (token) => {
-  if (!token || token.length < 10) return null;
+  if (!token || token === "DUMMY_TOKEN_CHECK" || token.length < 10) return null;
 
   try {
     const base64Url = token.split(".")[1];
