@@ -1,16 +1,5 @@
 const API_BASE_URL = "https://cinematch-api-mhxk.onrender.com";
 
-const getCookie = (name) => {
-  if (!document.cookie) return null;
-  const xsrfCookies = document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .filter((c) => c.startsWith(name + "="));
-
-  if (xsrfCookies.length === 0) return null;
-  return xsrfCookies[0].split("=")[1];
-};
-
 export const removeToken = () => {
   fetch(`${API_BASE_URL}/auth/logout`, {
     method: "POST",
@@ -25,20 +14,22 @@ export const removeToken = () => {
 };
 
 export const getToken = () => {
-  const actualToken = getCookie("csrf_access_token");
-  if (actualToken) {
-    return actualToken;
-  }
-  return null;
+  return "DUMMY_TOKEN_CHECK";
 };
 
-export const isAuthenticated = () => {
-  return !!getCookie("csrf_access_token");
+const getCookie = (name) => {
+  if (!document.cookie) return null;
+  const xsrfCookies = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .filter((c) => c.startsWith(name + "="));
+
+  if (xsrfCookies.length === 0) return null;
+  return xsrfCookies[0].split("=")[1];
 };
 
 export const decodeToken = (token) => {
-  if (!token || token === "DUMMY_TOKEN_CHECK" || token.length < 10) return null;
-
+  if (!token || token === "DUMMY_TOKEN_CHECK") return null;
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
